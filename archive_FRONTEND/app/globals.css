@@ -1,0 +1,331 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Design Tokens ── */
+:root {
+  --white: #ffffff;
+  --black: #0f0f0f;
+  --blob: #d4d4d4;
+  --input-bg: #f2f2f2;
+  --border: #e0e0e0;
+  --muted: #888888;
+  --blue: #2b2be0;
+  --blue-hover: #2020c8;
+  --card-shadow: 0 2px 32px rgba(0, 0, 0, 0.1), 0 0 0 0.5px rgba(0,0,0,0.06);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  font-family: 'DM Sans', sans-serif;
+  background: var(--white);
+  color: var(--black);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Blob background shapes ── */
+.blob-container {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.blob {
+  position: absolute;
+  background: var(--blob);
+}
+
+/* Top-left blob */
+.blob-tl {
+  width: 320px;
+  height: 280px;
+  top: -80px;
+  left: -90px;
+  border-radius: 55% 45% 38% 62% / 48% 60% 40% 52%;
+}
+
+/* Bottom-right blob */
+.blob-br {
+  width: 340px;
+  height: 300px;
+  bottom: -100px;
+  right: -90px;
+  border-radius: 48% 52% 62% 38% / 60% 44% 56% 40%;
+}
+
+/* ── Page wrapper ── */
+.page {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2.5rem 1rem 3rem;
+}
+
+/* ── Logo ── */
+.logo {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 700;
+  font-size: clamp(2.6rem, 6vw, 3.4rem);
+  line-height: 1.05;
+  text-align: center;
+  color: var(--black);
+  letter-spacing: -0.01em;
+  margin-bottom: 1.5rem;
+}
+
+.logo-tagline {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-align: center;
+  color: #555;
+  margin-top: 0.4rem;
+  font-style: italic;
+}
+
+/* ── Splash ── */
+.splash-logo {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 700;
+  font-size: clamp(3.5rem, 8vw, 5rem);
+  line-height: 1.05;
+  text-align: center;
+  color: var(--black);
+  letter-spacing: -0.01em;
+}
+
+/* ── Form Card ── */
+.form-card {
+  background: var(--white);
+  border-radius: 18px;
+  box-shadow: var(--card-shadow);
+  padding: 2rem 2.25rem 2rem;
+  width: 100%;
+  max-width: 380px;
+}
+
+.form-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.65rem;
+  font-weight: 600;
+  color: var(--black);
+  margin-bottom: 1.4rem;
+  letter-spacing: 0.02em;
+}
+
+/* ── Fields ── */
+.field { margin-bottom: 1rem; }
+
+.field-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.35rem;
+}
+
+.field-label {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--black);
+}
+
+.field-forgot {
+  font-size: 0.78rem;
+  color: var(--muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  padding: 0;
+}
+
+.input-row {
+  display: flex;
+  align-items: center;
+  background: var(--input-bg);
+  border-radius: 8px;
+  padding: 0 0.875rem;
+  height: 44px;
+  gap: 8px;
+  transition: box-shadow 0.15s ease;
+}
+
+.input-row:focus-within {
+  box-shadow: 0 0 0 2px rgba(43, 43, 224, 0.25);
+}
+
+.input-icon {
+  font-size: 16px;
+  color: var(--muted);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+}
+
+.input-row input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.9rem;
+  color: var(--black);
+  height: 100%;
+}
+
+.input-row input::placeholder { color: #bbb; }
+
+.eye-toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--muted);
+  padding: 0;
+  display: flex;
+  align-items: center;
+  font-size: 16px;
+}
+
+/* ── Buttons ── */
+.btn-login {
+  width: 100%;
+  height: 50px;
+  background: var(--black);
+  color: var(--white);
+  border: none;
+  border-radius: 10px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 1.05rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  margin-top: 0.75rem;
+  transition: background 0.2s, transform 0.12s;
+}
+
+.btn-login:hover { background: #222; }
+.btn-login:active { transform: scale(0.99); }
+
+.btn-register {
+  width: 100%;
+  height: 50px;
+  background: var(--blue);
+  color: var(--white);
+  border: none;
+  border-radius: 100px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  margin-top: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: background 0.2s, transform 0.12s;
+}
+
+.btn-register:hover { background: var(--blue-hover); }
+.btn-register:active { transform: scale(0.99); }
+
+/* ── Or divider ── */
+.or-divider {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 1.1rem 0 0.9rem;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.or-divider::before,
+.or-divider::after {
+  content: '';
+  flex: 1;
+  height: 0.5px;
+  background: var(--border);
+}
+
+/* ── Social buttons ── */
+.social-row { display: flex; gap: 0.7rem; }
+
+.btn-social {
+  flex: 1;
+  height: 42px;
+  border-radius: 9px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: opacity 0.15s, transform 0.12s;
+}
+
+.btn-social:hover { opacity: 0.88; }
+.btn-social:active { transform: scale(0.98); }
+
+.btn-google {
+  background: var(--white);
+  border: 1px solid var(--border);
+  color: #333;
+}
+
+.btn-facebook {
+  background: #1877f2;
+  border: none;
+  color: var(--white);
+}
+
+/* ── Nav link below card ── */
+.nav-text {
+  margin-top: 1.25rem;
+  font-size: 0.88rem;
+  color: #555;
+  text-align: center;
+}
+
+.nav-text a {
+  font-weight: 700;
+  color: var(--black);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.nav-text a.blue { color: var(--blue); }
+
+/* ── Animations ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.fade-up {
+  animation: fadeUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.d1 { animation-delay: 0.05s; }
+.d2 { animation-delay: 0.12s; }
+.d3 { animation-delay: 0.18s; }
+.d4 { animation-delay: 0.24s; }
+.d5 { animation-delay: 0.30s; }
+
+/* ── Responsive ── */
+@media (max-width: 480px) {
+  .form-card { padding: 1.5rem 1.25rem; }
+  .blob-tl { width: 220px; height: 190px; }
+  .blob-br { width: 220px; height: 190px; }
+}
