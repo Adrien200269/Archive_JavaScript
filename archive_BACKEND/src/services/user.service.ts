@@ -8,6 +8,7 @@ const toUserResponse = (user: IUser): UserResponseDTO => ({
   id: (user._id as any).toString(),
   fullName: user.fullName,
   email: user.email,
+  avatar: user.avatar,
   createdAt: user.createdAt,
 });
 

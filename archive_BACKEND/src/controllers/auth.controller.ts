@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { userService } from "../services/user.service";
 import { RegisterSchema, LoginSchema } from "../types/user.type";
+import { User } from "../models/user.model";
 
 // Cookie options reused for setting/clearing the auth cookie.
 const cookieOptions = {
@@ -68,5 +69,89 @@ export const authController = {
       return res.status(404).json({ success: false, message: "User not found" });
     }
     return res.status(200).json({ success: true, data: user });
+  },
+
+  // PUT /api/v1/auth/update  (protected)
+  async update(req: Request, res: Response) {
+    const userId = (req as any).userId as string;
+    const { fullName, email, oldPassword, password } = req.body;
+
+    const user = await User.findById(userId).select("+password");
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    // 1. Password update validation & hashing
+    if (password) {
+      if (!oldPassword) {
+        return res.status(400).json({
+          success: false,
+          message: "Validation failed",
+          errors: { oldPassword: ["Current password is required to change password"] },
+        });
+      }
+      const isPasswordValid = await user.comparePassword(oldPassword);
+      if (!isPasswordValid) {
+        return res.status(400).json({
+          success: false,
+          message: "Validation failed",
+          errors: { oldPassword: ["Incorrect current password"] },
+        });
+      }
+      if (password.length < 8) {
+        return res.status(400).json({
+          success: false,
+          message: "Validation failed",
+          errors: { password: ["New password must be at least 8 characters"] },
+        });
+      }
+      user.password = password;
+    }
+
+    // 2. Email uniqueness check
+    if (email && email.toLowerCase() !== user.email.toLowerCase()) {
+      const emailExists = await User.findOne({ email: email.toLowerCase() });
+      if (emailExists) {
+        return res.status(400).json({
+          success: false,
+          message: "Validation failed",
+          errors: { email: ["Email already in use"] },
+        });
+      }
+      user.email = email;
+    }
+
+    // 3. Name update
+    if (fullName) {
+      if (fullName.trim().length < 2) {
+        return res.status(400).json({
+          success: false,
+          message: "Validation failed",
+          errors: { fullName: ["Full name must be at least 2 characters"] },
+        });
+      }
+      user.fullName = fullName;
+    }
+
+    // 4. File upload (avatar)
+    if (req.file) {
+      user.avatar = `/uploads/${req.file.filename}`;
+    }
+
+    await user.save();
+
+    const responseData = {
+      id: user._id.toString(),
+      fullName: user.fullName,
+      email: user.email,
+      avatar: user.avatar,
+      createdAt: user.createdAt,
+    };
+
+    return res.status(200).json({
+      success: true,
+      message: "Profile updated successfully",
+      data: responseData,
+    });
   },
 };

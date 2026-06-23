@@ -1,10 +1,13 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import path from "path";
 import authRoutes from "./routes/auth.route";
 import { errorHandler } from "./middleware/error.middleware";
 
 const app = express();
+
+app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
 app.use(express.json());
 app.use(cookieParser());
