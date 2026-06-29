@@ -3,6 +3,8 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import path from "path";
 import authRoutes from "./routes/auth.route";
+import adminUserRoutes from "./routes/admin/user.route";
+import productRoutes from "./routes/product.route";
 import { errorHandler } from "./middleware/error.middleware";
 
 const app = express();
@@ -23,6 +25,9 @@ app.get("/", (_req, res) => res.json({ status: "Archive Outfitters API is runnin
 
 // Routes
 app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/admin/users", adminUserRoutes);
+app.use("/api/v1/products", productRoutes);
+
 
 // Error handler must be last
 app.use(errorHandler);

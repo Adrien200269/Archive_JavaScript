@@ -29,5 +29,6 @@ export interface User {
   fullName: string
   email: string
   avatar?: string
+  role?: string
   createdAt: string
 }

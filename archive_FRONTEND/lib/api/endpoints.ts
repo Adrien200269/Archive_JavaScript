@@ -6,4 +6,13 @@ export const ENDPOINTS = {
     logout: '/auth/logout',
     whoami: '/auth/whoami',
   },
+  admin: {
+    users: {
+      getAll: '/admin/users',
+      getById: (id: string) => `/admin/users/${id}`,
+      create: '/admin/users',
+      update: (id: string) => `/admin/users/${id}`,
+      delete: (id: string) => `/admin/users/${id}`,
+    },
+  },
 }

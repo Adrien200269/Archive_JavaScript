@@ -29,6 +29,7 @@ export const authenticate = (
       process.env.JWT_SECRET as string
     ) as JwtPayload;
     (req as any).userId = decoded.id;
+    (req as any).userRole = decoded.role;
     next();
   } catch {
     return res

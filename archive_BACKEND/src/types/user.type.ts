@@ -20,4 +20,5 @@ export type LoginInput = z.infer<typeof LoginSchema>;
 export interface JwtPayload {
   id: string;
   email: string;
+  role: string;
 }

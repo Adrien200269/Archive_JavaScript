@@ -9,7 +9,7 @@ export function middleware(request: NextRequest) {
   const isPublicAuthPath = pathname === '/login' || pathname === '/register'
   
   // Define protected paths that require authentication
-  const isProtectedPath = pathname.startsWith('/dashboard')
+  const isProtectedPath = pathname.startsWith('/dashboard') || pathname.startsWith('/admin')
 
   // If trying to access a protected path without a token, redirect to login
   if (isProtectedPath && !token) {
@@ -28,5 +28,5 @@ export function middleware(request: NextRequest) {
 
 // Config to specify which paths the middleware should run on
 export const config = {
-  matcher: ['/login', '/register', '/dashboard/:path*'],
+  matcher: ['/login', '/register', '/dashboard/:path*', '/admin/:path*'],
 }
