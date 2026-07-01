@@ -45,8 +45,8 @@ export default function LoginPage() {
       return
     }
 
-    // 4. On success, redirect to the dashboard
-    router.push('/dashboard')
+    // 4. On success, redirect based on role
+    router.push(res.data.user.role === 'admin' ? '/admin' : '/dashboard')
   }
 
   const clearError = (field: keyof FormErrors) =>

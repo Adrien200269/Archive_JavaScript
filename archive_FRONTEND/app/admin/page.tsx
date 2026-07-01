@@ -2,6 +2,18 @@ import Link from 'next/link'
 
 const CARDS = [
   {
+    href: '/admin/products',
+    label: 'Products',
+    desc: 'Manage product catalog – add and view products.',
+    icon: '📦',
+  },
+  {
+    href: '/admin/orders',
+    label: 'Orders',
+    desc: 'View and update customer order statuses.',
+    icon: '📋',
+  },
+  {
     href: '/admin/users',
     label: 'Users',
     desc: 'View, create, edit and delete user accounts.',

@@ -1,3 +1,5 @@
+import { redirect } from 'next/navigation'
+import { cookies } from 'next/headers'
 import Sidebar from './_components/Sidebar'
 import type { Metadata } from 'next'
 
@@ -6,7 +8,22 @@ export const metadata: Metadata = {
   description: 'Admin panel for managing Archive Outfitters users and content',
 }
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
+export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+  const cookieStore = await cookies()
+  const userCookie = cookieStore.get('user')?.value
+  if (userCookie) {
+    try {
+      const user = JSON.parse(userCookie)
+      if (user?.role !== 'admin') {
+        redirect('/dashboard')
+      }
+    } catch {
+      redirect('/login')
+    }
+  } else {
+    redirect('/login')
+  }
+
   return (
     <div className="admin-shell">
       <Sidebar />

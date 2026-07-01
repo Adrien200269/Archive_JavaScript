@@ -5,6 +5,8 @@ import path from "path";
 import authRoutes from "./routes/auth.route";
 import adminUserRoutes from "./routes/admin/user.route";
 import productRoutes from "./routes/product.route";
+import orderRoutes from "./routes/order.route";
+import adminOrderRoutes from "./routes/admin/order.route";
 import { errorHandler } from "./middleware/error.middleware";
 
 const app = express();
@@ -26,7 +28,9 @@ app.get("/", (_req, res) => res.json({ status: "Archive Outfitters API is runnin
 // Routes
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/admin/users", adminUserRoutes);
+app.use("/api/v1/admin/orders", adminOrderRoutes);
 app.use("/api/v1/products", productRoutes);
+app.use("/api/v1/orders", orderRoutes);
 
 
 // Error handler must be last

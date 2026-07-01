@@ -14,5 +14,20 @@ export const ENDPOINTS = {
       update: (id: string) => `/admin/users/${id}`,
       delete: (id: string) => `/admin/users/${id}`,
     },
+    orders: {
+      getAll: '/admin/orders',
+      updateStatus: (id: string) => `/admin/orders/${id}/status`,
+    },
+  },
+  products: {
+    getAll: '/products',
+    create: '/products',
+    update: (id: string) => `/products/${id}`,
+    delete: (id: string) => `/products/${id}`,
+    toggleFavorite: (id: string) => `/products/${id}/favorite`,
+  },
+  orders: {
+    create: '/orders',
+    getMy: '/orders/my',
   },
 }
