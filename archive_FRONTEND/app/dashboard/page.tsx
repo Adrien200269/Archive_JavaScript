@@ -4,7 +4,9 @@ import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useAuth } from '../context/AuthContext'
+import { useTheme } from '../context/ThemeContext'
 import { productService, Product } from '../../lib/api/product'
+import { recommendationService } from '../../lib/api/recommendation'
 import { orderService, Order } from '../../lib/api/order'
 
 interface CartItem {
@@ -15,6 +17,7 @@ interface CartItem {
 export default function DashboardPage() {
   const router = useRouter()
   const { user, loading: authLoading, logout } = useAuth()
+  const { theme, toggleTheme } = useTheme()
   
   // Navigation tabs: 'home' | 'orders' | 'profile'
   const [activeTab, setActiveTab] = useState<'home' | 'orders' | 'profile'>('home')
@@ -25,6 +28,10 @@ export default function DashboardPage() {
   const [productError, setProductError] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
   const [favoritesOnly, setFavoritesOnly] = useState(false)
+
+  // AI recommendation state
+  const [recommendations, setRecommendations] = useState<Product[]>([])
+  const [loadingRecs, setLoadingRecs] = useState(false)
   
   // Cart state
   const [cartItems, setCartItems] = useState<CartItem[]>([])
@@ -45,7 +52,7 @@ export default function DashboardPage() {
   const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0)
   const cartTotal = cartItems.reduce((sum, item) => sum + item.product.price * item.quantity, 0)
 
-  // Fetch products
+  // Fetch products and AI recommendations
   useEffect(() => {
     async function loadProducts() {
       try {
@@ -58,8 +65,20 @@ export default function DashboardPage() {
         setLoadingProducts(false)
       }
     }
+    async function loadRecommendations() {
+      try {
+        setLoadingRecs(true)
+        const data = await recommendationService.getRecommendations(6)
+        setRecommendations(data)
+      } catch {
+        // silent fail
+      } finally {
+        setLoadingRecs(false)
+      }
+    }
     if (activeTab === 'home') {
       loadProducts()
+      loadRecommendations()
     }
   }, [activeTab])
 
@@ -190,15 +209,15 @@ export default function DashboardPage() {
   })
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', backgroundColor: '#fcfcfc', color: 'var(--black)' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', backgroundColor: 'var(--white)', color: 'var(--black)' }}>
       
       {/* ── TOP HEADER BAR ── */}
       <header style={{
         position: 'sticky',
         top: 0,
         zIndex: 100,
-        backgroundColor: '#ffffff',
-        borderBottom: '1px solid #eaeaea',
+        backgroundColor: 'var(--card-bg)',
+        borderBottom: '1px solid var(--border)',
         height: '64px',
         display: 'flex',
         alignItems: 'center',
@@ -244,12 +263,12 @@ export default function DashboardPage() {
               height: '38px',
               padding: '0 1rem 0 2.5rem',
               borderRadius: '20px',
-              border: '1px solid #dcdcdc',
+              border: '1px solid var(--border)',
               fontSize: '0.9rem',
               outline: 'none',
               fontFamily: 'inherit',
               transition: 'border-color 0.2s ease',
-              backgroundColor: '#fafafa'
+              backgroundColor: 'var(--input-bg)'
             }}
           />
           <span style={{
@@ -257,7 +276,7 @@ export default function DashboardPage() {
             left: '0.85rem',
             top: '50%',
             transform: 'translateY(-50%)',
-            color: '#888888',
+            color: 'var(--muted)',
             display: 'flex',
             alignItems: 'center',
             pointerEvents: 'none'
@@ -330,15 +349,115 @@ export default function DashboardPage() {
               {favoritesOnly ? "Favourites" : "Most Selling"}
             </h1>
 
+            {/* AI Age-Based Recommendations */}
+            {!favoritesOnly && recommendations.length > 0 && (
+              <div style={{ marginBottom: '2.5rem' }}>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  marginBottom: '0.75rem',
+                }}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 2a4 4 0 0 1 4 4c0 2-2 5-4 7-2-2-4-5-4-7a4 4 0 0 1 4-4z"/>
+                    <path d="M12 22v-4"/>
+                    <path d="M9 18h6"/>
+                    <path d="M21 12a9 9 0 1 1-18 0"/>
+                  </svg>
+                  <span style={{
+                    fontSize: '0.7rem',
+                    fontWeight: 700,
+                    letterSpacing: '0.14em',
+                    textTransform: 'uppercase',
+                    color: 'var(--blue)',
+                  }}>
+                    AI Picked for You
+                  </span>
+                </div>
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+                  gap: '1rem',
+                }}>
+                  {recommendations.map((product) => (
+                    <div key={product._id} style={{
+                      backgroundColor: 'var(--card-bg)',
+                      border: '1px solid var(--border-light)',
+                      borderRadius: '12px',
+                      overflow: 'hidden',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.03)',
+                      transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                    }}>
+                      <div style={{
+                        position: 'relative',
+                        backgroundColor: 'var(--input-bg)',
+                        paddingTop: '100%',
+                        overflow: 'hidden',
+                      }}>
+                        <img
+                          src={product.imageUrl}
+                          alt={product.name}
+                          style={{
+                            position: 'absolute',
+                            top: 0, left: 0,
+                            width: '100%', height: '100%',
+                            objectFit: 'cover',
+                          }}
+                        />
+                      </div>
+                      <div style={{ padding: '0.85rem' }}>
+                        <h4 style={{
+                          fontSize: '0.85rem',
+                          fontWeight: 600,
+                          color: 'var(--black)',
+                          margin: '0 0 0.25rem',
+                          lineHeight: 1.2,
+                        }}>
+                          {product.name}
+                        </h4>
+                        <p style={{
+                          fontSize: '0.85rem',
+                          fontWeight: 700,
+                          color: 'var(--black)',
+                          margin: 0,
+                        }}>
+                          ₹{product.price.toLocaleString()}
+                        </p>
+                        <button
+                          onClick={() => addToCart(product)}
+                          style={{
+                            marginTop: '0.6rem',
+                            width: '100%',
+                            height: '32px',
+                            backgroundColor: 'var(--btn-bg)',
+                            color: 'var(--btn-text)',
+                            border: 'none',
+                            borderRadius: '6px',
+                            fontSize: '0.75rem',
+                            fontWeight: 600,
+                            cursor: 'pointer',
+                          }}
+                        >
+                          Add to Cart
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {loadingProducts ? (
               <div style={{ display: 'flex', justifyContent: 'center', padding: '4rem 0' }}>
                 <p style={{ color: 'var(--muted)', fontSize: '0.9rem' }}>Loading products…</p>
               </div>
             ) : productError ? (
               <div style={{
-                backgroundColor: '#fdf2f2',
-                border: '1px solid #f5c6c6',
-                color: '#c0392b',
+                backgroundColor: 'var(--error-bg)',
+                border: '1px solid var(--error)',
+                color: 'var(--error)',
                 padding: '1rem',
                 borderRadius: '8px',
                 marginBottom: '1.5rem'
@@ -349,8 +468,8 @@ export default function DashboardPage() {
               <div style={{
                 textAlign: 'center',
                 padding: '4rem 2rem',
-                backgroundColor: '#ffffff',
-                border: '1px solid #eaeaea',
+                backgroundColor: 'var(--card-bg)',
+                border: '1px solid var(--border)',
                 borderRadius: '12px',
                 color: 'var(--muted)'
               }}>
@@ -365,8 +484,8 @@ export default function DashboardPage() {
               }}>
                 {filteredProducts.map((product) => (
                   <div key={product._id} className="fade-up" style={{
-                    backgroundColor: '#ffffff',
-                    border: '1px solid #ebebeb',
+                    backgroundColor: 'var(--card-bg)',
+                    border: '1px solid var(--border-light)',
                     borderRadius: '16px',
                     overflow: 'hidden',
                     display: 'flex',
@@ -378,7 +497,7 @@ export default function DashboardPage() {
                     {/* Image Container */}
                     <div style={{
                       position: 'relative',
-                      backgroundColor: '#f6f6f6',
+                      backgroundColor: 'var(--input-bg)',
                       paddingTop: '100%', // Square image container
                       overflow: 'hidden'
                     }}>
@@ -413,7 +532,7 @@ export default function DashboardPage() {
                           justifyContent: 'center',
                           cursor: 'pointer',
                           boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                          color: product.isFavourite ? '#e74c3c' : '#bbbbbb',
+                          color: product.isFavourite ? '#e74c3c' : 'var(--muted-light)',
                           transition: 'transform 0.2s ease, color 0.2s ease'
                         }}
                         onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
@@ -458,8 +577,8 @@ export default function DashboardPage() {
                           marginTop: '0.8rem',
                           width: '100%',
                           height: '36px',
-                          backgroundColor: 'var(--black)',
-                          color: '#ffffff',
+                          backgroundColor: 'var(--btn-bg)',
+                          color: 'var(--btn-text)',
                           border: 'none',
                           borderRadius: '8px',
                           fontSize: '0.8rem',
@@ -508,9 +627,9 @@ export default function DashboardPage() {
               </div>
             ) : ordersError ? (
               <div style={{
-                backgroundColor: '#fdf2f2',
-                border: '1px solid #f5c6c6',
-                color: '#c0392b',
+                backgroundColor: 'var(--error-bg)',
+                border: '1px solid var(--error)',
+                color: 'var(--error)',
                 padding: '1rem',
                 borderRadius: '8px',
                 marginBottom: '1.5rem'
@@ -519,8 +638,8 @@ export default function DashboardPage() {
               </div>
             ) : orders.length === 0 ? (
               <div style={{
-                backgroundColor: '#ffffff',
-                border: '1px solid #eaeaea',
+                backgroundColor: 'var(--card-bg)',
+                border: '1px solid var(--border)',
                 borderRadius: '16px',
                 padding: '3rem 2rem',
                 textAlign: 'center',
@@ -533,8 +652,8 @@ export default function DashboardPage() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                 {orders.map((order) => (
                   <div key={order._id} style={{
-                    backgroundColor: '#ffffff',
-                    border: '1px solid #eaeaea',
+                    backgroundColor: 'var(--card-bg)',
+                    border: '1px solid var(--border)',
                     borderRadius: '16px',
                     padding: '1.25rem',
                     boxShadow: '0 4px 12px rgba(0,0,0,0.03)',
@@ -582,14 +701,14 @@ export default function DashboardPage() {
                             height: '48px',
                             borderRadius: '8px',
                             overflow: 'hidden',
-                            backgroundColor: '#f6f6f6',
+                            backgroundColor: 'var(--input-bg)',
                             flexShrink: 0,
                           }}>
                             <img src={item.imageUrl} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                           </div>
                           <div style={{ flex: 1, minWidth: 0 }}>
                             <p style={{ fontWeight: 600, fontSize: '0.85rem', color: 'var(--black)' }}>{item.name}</p>
-                            <p style={{ fontSize: '0.78rem', color: '#888' }}>Qty: {item.quantity}</p>
+                            <p style={{ fontSize: '0.78rem', color: 'var(--muted)' }}>Qty: {item.quantity}</p>
                           </div>
                           <p style={{ fontWeight: 600, fontSize: '0.85rem', color: 'var(--black)', whiteSpace: 'nowrap' }}>
                             ₹{(item.price * item.quantity).toLocaleString()}
@@ -602,9 +721,9 @@ export default function DashboardPage() {
                       <div style={{
                         marginTop: '0.75rem',
                         paddingTop: '0.75rem',
-                        borderTop: '1px solid #f0f0ee',
+                        borderTop: '1px solid var(--border-light)',
                         fontSize: '0.78rem',
-                        color: '#888',
+                        color: 'var(--muted)',
                       }}>
                         Deliver to: {order.delivery.address} · {order.delivery.phone}
                       </div>
@@ -613,12 +732,12 @@ export default function DashboardPage() {
                     <div style={{
                       marginTop: '0.75rem',
                       paddingTop: '0.75rem',
-                      borderTop: '1px solid #f0f0ee',
+                      borderTop: '1px solid var(--border-light)',
                       display: 'flex',
                       justifyContent: 'space-between',
                       alignItems: 'center',
                     }}>
-                      <span style={{ fontSize: '0.82rem', color: '#888' }}>Total</span>
+                      <span style={{ fontSize: '0.82rem', color: 'var(--muted)' }}>Total</span>
                       <span style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--black)' }}>
                         ₹{order.totalPrice.toLocaleString()}
                       </span>
@@ -630,7 +749,7 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* TAB 3: USER PROFILE SETTINGS (ORIGINAL DASHBOARD VIEW) */}
+        {/* TAB 3: ACCOUNT SETTINGS */}
         {activeTab === 'profile' && (
           <div className="fade-up" style={{
             display: 'flex',
@@ -650,81 +769,252 @@ export default function DashboardPage() {
               Account Settings
             </h1>
 
-            <div className="form-card" style={{ textAlign: 'center', position: 'relative', width: '100%', maxWidth: '380px' }}>
-              {/* Profile Avatar display */}
-              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.25rem' }}>
-                {user.avatar ? (
-                  <img
-                    src={user.avatar}
-                    alt="Avatar"
-                    style={{
-                      width: '84px',
-                      height: '84px',
-                      borderRadius: '50%',
-                      objectFit: 'cover',
-                      border: '2px solid var(--border)',
-                      boxShadow: '0 4px 12px rgba(0,0,0,0.08)'
-                    }}
-                  />
-                ) : (
-                  <div
-                    style={{
-                      width: '84px',
-                      height: '84px',
-                      borderRadius: '50%',
-                      backgroundColor: 'var(--input-bg)',
-                      color: 'var(--black)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: '1.5rem',
-                      fontWeight: '600',
-                      letterSpacing: '0.05em',
-                      border: '1px solid var(--border)'
-                    }}
-                  >
-                    {initials}
+            <div className="form-card" style={{ width: '100%', maxWidth: '420px' }}>
+              {/* Theme Toggle */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                paddingBottom: '1.25rem',
+                marginBottom: '1.25rem',
+                borderBottom: '1px solid var(--border)',
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--muted)' }}>
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                  </svg>
+                  <span style={{ fontSize: '0.9rem', fontWeight: 500, color: 'var(--black)' }}>Theme</span>
+                </div>
+                <button
+                  onClick={toggleTheme}
+                  style={{
+                    position: 'relative',
+                    width: '48px',
+                    height: '26px',
+                    borderRadius: '13px',
+                    border: 'none',
+                    cursor: 'pointer',
+                    backgroundColor: theme === 'dark' ? 'var(--blue)' : 'var(--muted-light)',
+                    transition: 'background-color 0.25s ease',
+                    padding: 0,
+                  }}
+                  aria-label="Toggle theme"
+                >
+                  <div style={{
+                    position: 'absolute',
+                    top: '3px',
+                    left: theme === 'dark' ? '24px' : '3px',
+                    width: '20px',
+                    height: '20px',
+                    borderRadius: '50%',
+                    backgroundColor: '#fff',
+                    transition: 'left 0.25s ease',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.15)',
+                  }}>
+                    {theme === 'dark' ? (
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="#2b2be0" stroke="none">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                      </svg>
+                    ) : (
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="#f39c12" stroke="none">
+                        <circle cx="12" cy="12" r="5"/>
+                        <line x1="12" y1="1" x2="12" y2="3" stroke="#f39c12" strokeWidth="2" strokeLinecap="round"/>
+                        <line x1="12" y1="21" x2="12" y2="23" stroke="#f39c12" strokeWidth="2" strokeLinecap="round"/>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" stroke="#f39c12" strokeWidth="2" strokeLinecap="round"/>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" stroke="#f39c12" strokeWidth="2" strokeLinecap="round"/>
+                        <line x1="1" y1="12" x2="3" y2="12" stroke="#f39c12" strokeWidth="2" strokeLinecap="round"/>
+                        <line x1="21" y1="12" x2="23" y2="12" stroke="#f39c12" strokeWidth="2" strokeLinecap="round"/>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" stroke="#f39c12" strokeWidth="2" strokeLinecap="round"/>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" stroke="#f39c12" strokeWidth="2" strokeLinecap="round"/>
+                      </svg>
+                    )}
                   </div>
-                )}
+                </button>
               </div>
 
-              <div className="form-title" style={{ marginBottom: '0.5rem' }}>Welcome, {user.fullName} 👋</div>
-              <p style={{ color: 'var(--muted)', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
-                Logged in as <strong>{user.email}</strong>
-              </p>
+              {/* Profile Avatar & Info */}
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
+                  {user.avatar ? (
+                    <img
+                      src={user.avatar}
+                      alt="Avatar"
+                      style={{
+                        width: '80px',
+                        height: '80px',
+                        borderRadius: '50%',
+                        objectFit: 'cover',
+                        border: '2px solid var(--border)',
+                      }}
+                    />
+                  ) : (
+                    <div
+                      style={{
+                        width: '80px',
+                        height: '80px',
+                        borderRadius: '50%',
+                        backgroundColor: 'var(--input-bg)',
+                        color: 'var(--black)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '1.5rem',
+                        fontWeight: '600',
+                        border: '2px solid var(--border)',
+                      }}
+                    >
+                      {initials}
+                    </div>
+                  )}
+                </div>
 
-              {/* Navigation Action Buttons */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginTop: '1rem' }}>
-                <Link href="/dashboard/profile" className="btn-register" style={{ height: '44px', textDecoration: 'none' }}>
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <div className="form-title" style={{ marginBottom: '0.25rem', fontSize: '1.4rem' }}>{user.fullName}</div>
+                <p style={{ color: 'var(--muted)', fontSize: '0.85rem', marginBottom: '1.5rem' }}>
+                  {user.email}
+                </p>
+              </div>
+
+              {/* Settings Sections */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                <div style={{
+                  fontSize: '0.7rem',
+                  fontWeight: 700,
+                  letterSpacing: '0.12em',
+                  textTransform: 'uppercase',
+                  color: 'var(--muted)',
+                  marginBottom: '0.25rem',
+                }}>
+                  Account
+                </div>
+
+                <Link href="/dashboard/profile"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.75rem',
+                    padding: '0.75rem 1rem',
+                    borderRadius: '10px',
+                    backgroundColor: 'var(--input-bg)',
+                    color: 'var(--black)',
+                    textDecoration: 'none',
+                    fontSize: '0.9rem',
+                    fontWeight: 500,
+                    transition: 'background-color 0.15s',
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.backgroundColor = 'var(--border)'}
+                  onMouseLeave={e => e.currentTarget.style.backgroundColor = 'var(--input-bg)'}
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, color: 'var(--muted)' }}>
                     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
                     <circle cx="12" cy="7" r="4"/>
                   </svg>
-                  Update Profile
+                  <span style={{ flex: 1 }}>Edit Profile</span>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--muted)' }}>
+                    <polyline points="9 18 15 12 9 6"/>
+                  </svg>
                 </Link>
 
-                <Link href="/dashboard/password" className="btn-register" style={{ height: '44px', textDecoration: 'none', backgroundColor: '#555' }}>
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <Link href="/dashboard/password"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.75rem',
+                    padding: '0.75rem 1rem',
+                    borderRadius: '10px',
+                    backgroundColor: 'var(--input-bg)',
+                    color: 'var(--black)',
+                    textDecoration: 'none',
+                    fontSize: '0.9rem',
+                    fontWeight: 500,
+                    transition: 'background-color 0.15s',
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.backgroundColor = 'var(--border)'}
+                  onMouseLeave={e => e.currentTarget.style.backgroundColor = 'var(--input-bg)'}
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, color: 'var(--muted)' }}>
                     <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
                     <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
                   </svg>
-                  Change Password
+                  <span style={{ flex: 1 }}>Change Password</span>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--muted)' }}>
+                    <polyline points="9 18 15 12 9 6"/>
+                  </svg>
                 </Link>
 
+                <div style={{
+                  fontSize: '0.7rem',
+                  fontWeight: 700,
+                  letterSpacing: '0.12em',
+                  textTransform: 'uppercase',
+                  color: 'var(--muted)',
+                  marginTop: '0.75rem',
+                  marginBottom: '0.25rem',
+                }}>
+                  Access
+                </div>
+
                 {user.role === 'admin' && (
-                  <Link href="/admin" className="btn-register" style={{ height: '44px', textDecoration: 'none', backgroundColor: '#1a1a1a' }}>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <Link href="/admin"
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.75rem',
+                      padding: '0.75rem 1rem',
+                      borderRadius: '10px',
+                      backgroundColor: 'var(--input-bg)',
+                      color: 'var(--blue)',
+                      textDecoration: 'none',
+                      fontSize: '0.9rem',
+                      fontWeight: 500,
+                      transition: 'background-color 0.15s',
+                    }}
+                    onMouseEnter={e => e.currentTarget.style.backgroundColor = 'var(--border)'}
+                    onMouseLeave={e => e.currentTarget.style.backgroundColor = 'var(--input-bg)'}
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, color: 'var(--muted)' }}>
                       <rect x="3" y="3" width="7" height="7"/>
                       <rect x="14" y="3" width="7" height="7"/>
                       <rect x="14" y="14" width="7" height="7"/>
                       <rect x="3" y="14" width="7" height="7"/>
                     </svg>
-                    Admin Panel
+                    <span style={{ flex: 1 }}>Admin Panel</span>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--muted)' }}>
+                      <polyline points="9 18 15 12 9 6"/>
+                    </svg>
                   </Link>
                 )}
 
-                <button type="button" className="btn-login" onClick={handleLogout} style={{ height: '44px', marginTop: '0.5rem' }}>
-                  Log out
+                <button
+                  onClick={handleLogout}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.75rem',
+                    padding: '0.75rem 1rem',
+                    borderRadius: '10px',
+                    backgroundColor: 'transparent',
+                    color: 'var(--error)',
+                    textDecoration: 'none',
+                    fontSize: '0.9rem',
+                    fontWeight: 500,
+                    border: '1px solid var(--border)',
+                    cursor: 'pointer',
+                    fontFamily: 'inherit',
+                    transition: 'background-color 0.15s',
+                    marginTop: '0.5rem',
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.backgroundColor = 'var(--input-bg)'}
+                  onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                    <polyline points="16 17 21 12 16 7"/>
+                    <line x1="21" y1="12" x2="9" y2="12"/>
+                  </svg>
+                  <span style={{ flex: 1 }}>Log Out</span>
                 </button>
               </div>
             </div>
@@ -751,7 +1041,7 @@ export default function DashboardPage() {
             width: '100%',
             maxWidth: '400px',
             height: '100%',
-            backgroundColor: '#ffffff',
+            backgroundColor: 'var(--card-bg)',
             boxShadow: '-4px 0 20px rgba(0,0,0,0.08)',
             display: 'flex',
             flexDirection: 'column',
@@ -762,7 +1052,7 @@ export default function DashboardPage() {
               alignItems: 'center',
               justifyContent: 'space-between',
               padding: '1.25rem 1.5rem',
-              borderBottom: '1px solid #eaeaea',
+              borderBottom: '1px solid var(--border)',
             }}>
               <h2 style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--black)', margin: 0 }}>
                 Cart ({cartCount})
@@ -774,7 +1064,7 @@ export default function DashboardPage() {
                   border: 'none',
                   cursor: 'pointer',
                   fontSize: '1.25rem',
-                  color: '#888',
+                  color: 'var(--muted)',
                   padding: '0.25rem',
                   lineHeight: 1,
                 }}
@@ -794,7 +1084,7 @@ export default function DashboardPage() {
                   color: 'var(--muted)',
                   textAlign: 'center',
                 }}>
-                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ccc" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--muted-light)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                     <circle cx="9" cy="21" r="1"/>
                     <circle cx="20" cy="21" r="1"/>
                     <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
@@ -808,14 +1098,14 @@ export default function DashboardPage() {
                       display: 'flex',
                       gap: '0.75rem',
                       paddingBottom: '1rem',
-                      borderBottom: '1px solid #f0f0ee',
+                      borderBottom: '1px solid var(--border-light)',
                     }}>
                       <div style={{
                         width: '64px',
                         height: '64px',
                         borderRadius: '8px',
                         overflow: 'hidden',
-                        backgroundColor: '#f6f6f6',
+                        backgroundColor: 'var(--input-bg)',
                         flexShrink: 0,
                       }}>
                         <img src={item.product.imageUrl} alt={item.product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -834,8 +1124,8 @@ export default function DashboardPage() {
                               width: '28px',
                               height: '28px',
                               borderRadius: '6px',
-                              border: '1px solid #ddd',
-                              background: '#fff',
+                              border: '1px solid var(--border)',
+                              background: 'var(--card-bg)',
                               cursor: 'pointer',
                               fontSize: '1rem',
                               fontWeight: 600,
@@ -857,8 +1147,8 @@ export default function DashboardPage() {
                               width: '28px',
                               height: '28px',
                               borderRadius: '6px',
-                              border: '1px solid #ddd',
-                              background: '#fff',
+                              border: '1px solid var(--border)',
+                              background: 'var(--card-bg)',
                               cursor: 'pointer',
                               fontSize: '1rem',
                               fontWeight: 600,
@@ -884,10 +1174,10 @@ export default function DashboardPage() {
 
             {cartItems.length > 0 && (
               <div style={{
-                borderTop: '1px solid #eaeaea',
+                borderTop: '1px solid var(--border)',
                 padding: '1.25rem 1.5rem',
               }}>
-                <p style={{ fontSize: '0.82rem', fontWeight: 700, color: '#555', marginBottom: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                <p style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--muted)', marginBottom: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                   Delivery Details
                 </p>
                 <div className="admin-field" style={{ marginBottom: '0.6rem' }}>
@@ -928,7 +1218,7 @@ export default function DashboardPage() {
                   alignItems: 'center',
                   marginBottom: '1rem',
                 }}>
-                  <span style={{ fontSize: '0.9rem', color: '#888' }}>Total</span>
+                  <span style={{ fontSize: '0.9rem', color: 'var(--muted)' }}>Total</span>
                   <span style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--black)' }}>
                     ₹{cartTotal.toLocaleString()}
                   </span>
@@ -939,8 +1229,8 @@ export default function DashboardPage() {
                   style={{
                     width: '100%',
                     height: '46px',
-                    backgroundColor: 'var(--black)',
-                    color: '#fff',
+                    backgroundColor: 'var(--btn-bg)',
+                    color: 'var(--btn-text)',
                     border: 'none',
                     borderRadius: '8px',
                     fontSize: '0.9rem',
@@ -966,8 +1256,8 @@ export default function DashboardPage() {
           left: '50%',
           transform: 'translateX(-50%)',
           zIndex: 3000,
-          backgroundColor: checkoutMessage.includes('successfully') ? '#e8f8f0' : '#fdf2f2',
-          color: checkoutMessage.includes('successfully') ? '#27ae60' : '#c0392b',
+          backgroundColor: checkoutMessage.includes('successfully') ? 'var(--success-bg)' : 'var(--error-bg)',
+          color: checkoutMessage.includes('successfully') ? 'var(--success)' : 'var(--error)',
           padding: '0.75rem 1.5rem',
           borderRadius: '8px',
           fontSize: '0.85rem',
@@ -986,8 +1276,8 @@ export default function DashboardPage() {
         left: 0,
         right: 0,
         height: '64px',
-        backgroundColor: '#ffffff',
-        borderTop: '1px solid #eaeaea',
+        backgroundColor: 'var(--card-bg)',
+        borderTop: '1px solid var(--border)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-around',

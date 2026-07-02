@@ -18,6 +18,17 @@ function toError(err: any) {
   }
 }
 
+function calcAge(dob: string | undefined): number | undefined {
+  if (!dob) return undefined
+  const birth = new Date(dob)
+  if (isNaN(birth.getTime())) return undefined
+  const today = new Date()
+  let age = today.getFullYear() - birth.getFullYear()
+  const m = today.getMonth() - birth.getMonth()
+  if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--
+  return age
+}
+
 // REGISTER: send only the fields the API expects.
 export async function registerAction(
   values: RegisterValues
@@ -27,6 +38,7 @@ export async function registerAction(
       fullName: values.fullName,
       email: values.email,
       password: values.password,
+      age: calcAge(values.dob),
     })
     return { ok: true, data: data.data as User }
   } catch (err) {

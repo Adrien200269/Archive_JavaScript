@@ -5,6 +5,8 @@ export const ENDPOINTS = {
     login: '/auth/login',
     logout: '/auth/logout',
     whoami: '/auth/whoami',
+    forgotPassword: '/auth/forgot-password',
+    resetPassword: '/auth/reset-password',
   },
   admin: {
     users: {
@@ -29,5 +31,8 @@ export const ENDPOINTS = {
   orders: {
     create: '/orders',
     getMy: '/orders/my',
+  },
+  recommendations: {
+    get: '/recommendations',
   },
 }

@@ -2,11 +2,13 @@ import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import path from "path";
+import passport from "./config/passport";
 import authRoutes from "./routes/auth.route";
 import adminUserRoutes from "./routes/admin/user.route";
 import productRoutes from "./routes/product.route";
 import orderRoutes from "./routes/order.route";
 import adminOrderRoutes from "./routes/admin/order.route";
+import recommendationRoutes from "./routes/recommendation.route";
 import { errorHandler } from "./middleware/error.middleware";
 
 const app = express();
@@ -15,6 +17,7 @@ app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
 app.use(express.json());
 app.use(cookieParser());
+app.use(passport.initialize());
 app.use(
   cors({
     origin: process.env.CLIENT_URL || "http://localhost:3000",
@@ -31,6 +34,7 @@ app.use("/api/v1/admin/users", adminUserRoutes);
 app.use("/api/v1/admin/orders", adminOrderRoutes);
 app.use("/api/v1/products", productRoutes);
 app.use("/api/v1/orders", orderRoutes);
+app.use("/api/v1/recommendations", recommendationRoutes);
 
 
 // Error handler must be last

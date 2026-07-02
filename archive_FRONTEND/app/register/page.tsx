@@ -89,7 +89,7 @@ const Field = ({ id, label, icon, children, error }: FieldProps) => (
       {children}
     </div>
     {error && (
-      <p style={{ color: '#c0392b', fontSize: '0.75rem', marginTop: '0.3rem' }}>{error}</p>
+      <p style={{ color: 'var(--error)', fontSize: '0.75rem', marginTop: '0.3rem' }}>{error}</p>
     )}
   </div>
 )
@@ -215,7 +215,7 @@ export default function RegisterPage() {
           </Field>
 
           {errors.form && (
-            <p style={{ color: '#c0392b', fontSize: '0.8rem', marginBottom: '0.75rem', textAlign: 'center' }}>
+            <p style={{ color: 'var(--error)', fontSize: '0.8rem', marginBottom: '0.75rem', textAlign: 'center' }}>
               {errors.form}
             </p>
           )}
@@ -232,12 +232,12 @@ export default function RegisterPage() {
 
         <div className="or-divider">or continue with</div>
         <div className="social-row">
-          <button type="button" className="btn-social btn-google">
+          <a href="/api/v1/auth/google" className="btn-social btn-google" style={{ textDecoration: 'none' }}>
             <GoogleIcon /> Google
-          </button>
-          <button type="button" className="btn-social btn-facebook">
+          </a>
+          <a href="/api/v1/auth/facebook" className="btn-social btn-facebook" style={{ textDecoration: 'none' }}>
             <FacebookIcon /> Facebook
-          </button>
+          </a>
         </div>
       </div>
 

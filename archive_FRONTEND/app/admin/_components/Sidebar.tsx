@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { useAuth } from '@/app/context/AuthContext'
+import { useTheme } from '@/app/context/ThemeContext'
 import { logoutAction } from '@/lib/actions/auth-action'
 import api from '@/lib/api/axios'
 import Modal from './Modal'
@@ -19,18 +20,17 @@ export default function Sidebar() {
   const pathname = usePathname()
   const router = useRouter()
   const { user, updateUser } = useAuth()
+  const { theme, toggleTheme } = useTheme()
 
   const [profileModal, setProfileModal] = useState(false)
   const [passwordModal, setPasswordModal] = useState(false)
 
-  // Profile form state
   const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
   const [avatarFile, setAvatarFile] = useState<File | null>(null)
   const [avatarPreview, setAvatarPreview] = useState('')
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  // Password form state
   const [oldPassword, setOldPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -154,15 +154,84 @@ export default function Sidebar() {
         </nav>
 
         <div className="admin-sidebar-footer" style={{ padding: '0.75rem 1rem' }}>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.65rem',
-            marginBottom: '0.75rem',
-            padding: '0.5rem 0.5rem',
-            borderRadius: '8px',
-            backgroundColor: '#f5f5f3',
-          }}>
+          {/* Dark mode toggle */}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '0.4rem 0.5rem 0.6rem',
+              marginBottom: '0.5rem',
+              borderBottom: '1px solid var(--border)',
+            }}
+          >
+            <span style={{ fontSize: '0.78rem', fontWeight: 500, color: 'var(--muted)' }}>
+              {theme === 'dark' ? 'Dark Mode' : 'Light Mode'}
+            </span>
+            <button
+              onClick={toggleTheme}
+              style={{
+                position: 'relative',
+                width: '40px',
+                height: '22px',
+                borderRadius: '11px',
+                border: 'none',
+                cursor: 'pointer',
+                backgroundColor: theme === 'dark' ? 'var(--blue)' : 'var(--muted-light)',
+                transition: 'background-color 0.25s ease',
+                padding: 0,
+                flexShrink: 0,
+              }}
+              aria-label="Toggle theme"
+            >
+              <div
+                style={{
+                  position: 'absolute',
+                  top: '2px',
+                  left: theme === 'dark' ? '20px' : '2px',
+                  width: '18px',
+                  height: '18px',
+                  borderRadius: '50%',
+                  backgroundColor: '#fff',
+                  transition: 'left 0.25s ease',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.15)',
+                }}
+              >
+                {theme === 'dark' ? (
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="var(--blue)" stroke="none">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                  </svg>
+                ) : (
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="#f39c12" stroke="none">
+                    <circle cx="12" cy="12" r="5"/>
+                    <line x1="12" y1="1" x2="12" y2="3" stroke="#f39c12" strokeWidth="2" strokeLinecap="round"/>
+                    <line x1="12" y1="21" x2="12" y2="23" stroke="#f39c12" strokeWidth="2" strokeLinecap="round"/>
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" stroke="#f39c12" strokeWidth="2" strokeLinecap="round"/>
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" stroke="#f39c12" strokeWidth="2" strokeLinecap="round"/>
+                    <line x1="1" y1="12" x2="3" y2="12" stroke="#f39c12" strokeWidth="2" strokeLinecap="round"/>
+                    <line x1="21" y1="12" x2="23" y2="12" stroke="#f39c12" strokeWidth="2" strokeLinecap="round"/>
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" stroke="#f39c12" strokeWidth="2" strokeLinecap="round"/>
+                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" stroke="#f39c12" strokeWidth="2" strokeLinecap="round"/>
+                  </svg>
+                )}
+              </div>
+            </button>
+          </div>
+
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.65rem',
+              marginBottom: '0.75rem',
+              padding: '0.5rem 0.5rem',
+              borderRadius: '8px',
+              backgroundColor: 'var(--input-bg)',
+            }}
+          >
             <div className="admin-avatar-circle" style={{ width: '34px', height: '34px', fontSize: '0.8rem', flexShrink: 0 }}>
               {user?.avatar ? (
                 <img src={user.avatar} alt="" />
@@ -174,7 +243,7 @@ export default function Sidebar() {
               <p style={{ fontWeight: 600, fontSize: '0.82rem', color: 'var(--black)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 {user?.fullName || 'Admin'}
               </p>
-              <p style={{ fontSize: '0.7rem', color: '#888', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <p style={{ fontSize: '0.7rem', color: 'var(--muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 {user?.email || ''}
               </p>
             </div>
@@ -197,14 +266,13 @@ export default function Sidebar() {
           <button
             onClick={handleLogout}
             className="admin-sidebar-back"
-            style={{ width: '100%', textAlign: 'left', fontSize: '0.78rem', color: '#c0392b', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}
+            style={{ width: '100%', textAlign: 'left', fontSize: '0.78rem', color: 'var(--error)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}
           >
             Sign Out
           </button>
         </div>
       </aside>
 
-      {/* Update Profile Modal */}
       <Modal open={profileModal} onClose={() => setProfileModal(false)} title="Update Profile">
         <form onSubmit={handleProfileSubmit}>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '1.25rem' }}>
@@ -212,8 +280,8 @@ export default function Sidebar() {
               onClick={() => fileInputRef.current?.click()}
               style={{
                 width: '80px', height: '80px', borderRadius: '50%', cursor: 'pointer',
-                overflow: 'hidden', border: '2px solid #ddd', display: 'flex',
-                alignItems: 'center', justifyContent: 'center', backgroundColor: '#f5f5f3',
+                overflow: 'hidden', border: '2px solid var(--border)', display: 'flex',
+                alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--input-bg)',
               }}
             >
               {avatarPreview ? (
@@ -222,7 +290,7 @@ export default function Sidebar() {
                 <span style={{ fontSize: '1.5rem', fontWeight: 600, color: 'var(--black)' }}>{initials}</span>
               )}
             </div>
-            <button type="button" onClick={() => fileInputRef.current?.click()} style={{ background: 'none', border: 'none', color: '#888', fontSize: '0.75rem', cursor: 'pointer', marginTop: '0.4rem' }}>
+            <button type="button" onClick={() => fileInputRef.current?.click()} style={{ background: 'none', border: 'none', color: 'var(--muted)', fontSize: '0.75rem', cursor: 'pointer', marginTop: '0.4rem' }}>
               Change Photo
             </button>
             <input ref={fileInputRef} type="file" accept="image/*" style={{ display: 'none' }}
@@ -246,7 +314,7 @@ export default function Sidebar() {
           </div>
 
           {profileMsg && (
-            <p style={{ color: profileMsg.includes('successfully') ? '#27ae60' : '#c0392b', fontSize: '0.8rem', marginBottom: '0.75rem', textAlign: 'center' }}>
+            <p style={{ color: profileMsg.includes('successfully') ? 'var(--success)' : 'var(--error)', fontSize: '0.8rem', marginBottom: '0.75rem', textAlign: 'center' }}>
               {profileMsg}
             </p>
           )}
@@ -258,7 +326,6 @@ export default function Sidebar() {
         </form>
       </Modal>
 
-      {/* Change Password Modal */}
       <Modal open={passwordModal} onClose={() => setPasswordModal(false)} title="Change Password">
         <form onSubmit={handlePasswordSubmit}>
           <div className="admin-field">
@@ -275,7 +342,7 @@ export default function Sidebar() {
           </div>
 
           {passwordMsg && (
-            <p style={{ color: passwordMsg.includes('successfully') ? '#27ae60' : '#c0392b', fontSize: '0.8rem', marginBottom: '0.75rem', textAlign: 'center' }}>
+            <p style={{ color: passwordMsg.includes('successfully') ? 'var(--success)' : 'var(--error)', fontSize: '0.8rem', marginBottom: '0.75rem', textAlign: 'center' }}>
               {passwordMsg}
             </p>
           )}

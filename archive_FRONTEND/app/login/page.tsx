@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, FormEvent, ChangeEvent } from 'react'
+import { useState, FormEvent, ChangeEvent, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import GoogleIcon from '../components/GoogleIcon'
@@ -21,6 +21,20 @@ export default function LoginPage() {
   const [showPw, setShowPw]     = useState<boolean>(false)
   const [errors, setErrors]     = useState<FormErrors>({})
   const [loading, setLoading]   = useState<boolean>(false)
+  const [resetSuccess, setResetSuccess] = useState<string>('')
+  const [oauthError, setOauthError] = useState<string>('')
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    if (params.get('reset') === 'success') {
+      setResetSuccess('Password reset successfully! You can now log in.')
+      window.history.replaceState({}, '', '/login')
+    }
+    if (params.get('oauth') === 'failed') {
+      setOauthError('Social login failed. Please try again or use email.')
+      window.history.replaceState({}, '', '/login')
+    }
+  }, [])
 
   const handleSubmit = async (ev: FormEvent<HTMLFormElement>) => {
     ev.preventDefault()
@@ -95,7 +109,7 @@ export default function LoginPage() {
               />
             </div>
             {errors.email && (
-              <p style={{ color: '#c0392b', fontSize: '0.75rem', marginTop: '0.3rem' }}>
+              <p style={{ color: 'var(--error)', fontSize: '0.75rem', marginTop: '0.3rem' }}>
                 {errors.email}
               </p>
             )}
@@ -105,7 +119,7 @@ export default function LoginPage() {
           <div className="field">
             <div className="field-header">
               <label className="field-label" htmlFor="password">Password</label>
-              <button type="button" className="field-forgot">Forgot?</button>
+              <Link href="/forgot-password" className="field-forgot">Forgot?</Link>
             </div>
             <div className="input-row">
               <span className="input-icon" aria-hidden="true">
@@ -146,14 +160,26 @@ export default function LoginPage() {
               </button>
             </div>
             {errors.password && (
-              <p style={{ color: '#c0392b', fontSize: '0.75rem', marginTop: '0.3rem' }}>
+              <p style={{ color: 'var(--error)', fontSize: '0.75rem', marginTop: '0.3rem' }}>
                 {errors.password}
               </p>
             )}
           </div>
 
+          {resetSuccess && (
+            <p style={{ color: 'var(--success)', fontSize: '0.8rem', marginBottom: '0.75rem', textAlign: 'center', fontWeight: 500 }}>
+              {resetSuccess}
+            </p>
+          )}
+
+          {oauthError && (
+            <p style={{ color: 'var(--error)', fontSize: '0.8rem', marginBottom: '0.75rem', textAlign: 'center' }}>
+              {oauthError}
+            </p>
+          )}
+
           {errors.form && (
-            <p style={{ color: '#c0392b', fontSize: '0.8rem', marginBottom: '0.75rem', textAlign: 'center' }}>
+            <p style={{ color: 'var(--error)', fontSize: '0.8rem', marginBottom: '0.75rem', textAlign: 'center' }}>
               {errors.form}
             </p>
           )}
@@ -170,12 +196,12 @@ export default function LoginPage() {
 
         <div className="or-divider">or continue with</div>
         <div className="social-row">
-          <button type="button" className="btn-social btn-google">
+          <a href="/api/v1/auth/google" className="btn-social btn-google" style={{ textDecoration: 'none' }}>
             <GoogleIcon /> Google
-          </button>
-          <button type="button" className="btn-social btn-facebook">
+          </a>
+          <a href="/api/v1/auth/facebook" className="btn-social btn-facebook" style={{ textDecoration: 'none' }}>
             <FacebookIcon /> Facebook
-          </button>
+          </a>
         </div>
       </div>
 

@@ -5,10 +5,21 @@ export interface RegisterDTO {
   fullName: string;
   email: string;
   password: string;
+  age?: number;
 }
 
 export interface LoginDTO {
   email: string;
+  password: string;
+}
+
+export interface ForgotPasswordDTO {
+  email: string;
+}
+
+export interface ResetPasswordDTO {
+  email: string;
+  code: string;
   password: string;
 }
 
@@ -18,7 +29,9 @@ export interface UserResponseDTO {
   fullName: string;
   email: string;
   avatar?: string;
+  age?: number;
   role: string;
+  provider: string;
   createdAt: Date;
 }
 

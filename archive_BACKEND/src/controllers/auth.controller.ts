@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { userService } from "../services/user.service";
-import { RegisterSchema, LoginSchema } from "../types/user.type";
+import { RegisterSchema, LoginSchema, ForgotPasswordSchema, ResetPasswordSchema } from "../types/user.type";
 import { User } from "../models/user.model";
 
 // Cookie options reused for setting/clearing the auth cookie.
@@ -152,6 +152,42 @@ export const authController = {
       success: true,
       message: "Profile updated successfully",
       data: responseData,
+    });
+  },
+
+  // POST /api/v1/auth/forgot-password
+  async forgotPassword(req: Request, res: Response) {
+    const parsed = ForgotPasswordSchema.safeParse(req.body);
+    if (!parsed.success) {
+      return res.status(400).json({
+        success: false,
+        message: "Validation failed",
+        errors: parsed.error.flatten().fieldErrors,
+      });
+    }
+
+    await userService.forgotPassword(parsed.data);
+    return res.status(200).json({
+      success: true,
+      message: "If that email is registered, a reset code has been sent.",
+    });
+  },
+
+  // POST /api/v1/auth/reset-password
+  async resetPassword(req: Request, res: Response) {
+    const parsed = ResetPasswordSchema.safeParse(req.body);
+    if (!parsed.success) {
+      return res.status(400).json({
+        success: false,
+        message: "Validation failed",
+        errors: parsed.error.flatten().fieldErrors,
+      });
+    }
+
+    await userService.resetPassword(parsed.data);
+    return res.status(200).json({
+      success: true,
+      message: "Password has been reset successfully.",
     });
   },
 };

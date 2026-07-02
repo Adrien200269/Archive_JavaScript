@@ -7,7 +7,12 @@ export interface IUser extends Document {
   email: string;
   password: string;
   avatar?: string;
+  age?: number;
   role: "user" | "admin";
+  provider: "local" | "google" | "facebook";
+  providerId?: string;
+  resetPasswordCode?: string;
+  resetPasswordExpires?: Date;
   createdAt: Date;
   updatedAt: Date;
   comparePassword(candidate: string): Promise<boolean>;
@@ -36,10 +41,27 @@ const userSchema = new Schema<IUser>(
     avatar: {
       type: String,
     },
+    age: {
+      type: Number,
+    },
     role: {
       type: String,
       enum: ["user", "admin"],
       default: "user",
+    },
+    provider: {
+      type: String,
+      enum: ["local", "google", "facebook"],
+      default: "local",
+    },
+    providerId: {
+      type: String,
+    },
+    resetPasswordCode: {
+      type: String,
+    },
+    resetPasswordExpires: {
+      type: Date,
     },
   },
   { timestamps: true }

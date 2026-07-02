@@ -1,7 +1,9 @@
 import jwt from "jsonwebtoken";
+import crypto from "crypto";
 import { User, IUser } from "../models/user.model";
-import { RegisterDTO, LoginDTO, UserResponseDTO, AdminCreateUserDTO, AdminUpdateUserDTO } from "../dtos/user.dto";
+import { RegisterDTO, LoginDTO, ForgotPasswordDTO, ResetPasswordDTO, UserResponseDTO, AdminCreateUserDTO, AdminUpdateUserDTO } from "../dtos/user.dto";
 import { JwtPayload } from "../types/user.type";
+import { sendResetCodeEmail } from "./email.service";
 
 // Strip the password and reshape the Mongoose doc into a safe client response.
 const toUserResponse = (user: IUser): UserResponseDTO => ({
@@ -9,7 +11,9 @@ const toUserResponse = (user: IUser): UserResponseDTO => ({
   fullName: user.fullName,
   email: user.email,
   avatar: user.avatar,
+  age: user.age,
   role: user.role,
+  provider: user.provider,
   createdAt: user.createdAt,
 });
 
@@ -38,6 +42,8 @@ export const userService = {
       fullName: dto.fullName,
       email: dto.email,
       password: dto.password,
+      age: dto.age,
+      provider: "local",
     });
 
     return toUserResponse(user);
@@ -69,6 +75,42 @@ export const userService = {
   async getById(id: string): Promise<UserResponseDTO | null> {
     const user = await User.findById(id);
     return user ? toUserResponse(user) : null;
+  },
+
+  // FORGOT PASSWORD: generate a 6-digit code, save it, email it.
+  async forgotPassword(dto: ForgotPasswordDTO): Promise<void> {
+    const user = await User.findOne({ email: dto.email.toLowerCase() });
+    // Don't reveal whether the email exists
+    if (!user) return;
+
+    const code = crypto.randomInt(100000, 999999).toString();
+    user.resetPasswordCode = code;
+    user.resetPasswordExpires = new Date(Date.now() + 15 * 60 * 1000); // 15 min
+    await user.save();
+
+    await sendResetCodeEmail(user.email, code).catch((err) => {
+      console.error("Failed to send reset email:", err);
+    });
+  },
+
+  // RESET PASSWORD: verify code + expiry, update password.
+  async resetPassword(dto: ResetPasswordDTO): Promise<void> {
+    const user = await User.findOne({
+      email: dto.email.toLowerCase(),
+      resetPasswordCode: dto.code,
+      resetPasswordExpires: { $gt: new Date() },
+    }).select("+password");
+
+    if (!user) {
+      const err: any = new Error("Invalid or expired reset code");
+      err.status = 400;
+      throw err;
+    }
+
+    user.password = dto.password;
+    user.resetPasswordCode = undefined;
+    user.resetPasswordExpires = undefined;
+    await user.save();
   },
 
   // ── Admin Service Methods ──────────────────────────────────────────────────

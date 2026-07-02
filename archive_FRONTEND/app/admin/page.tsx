@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import RecommendationsSection from './_components/RecommendationsSection'
 
 const CARDS = [
   {
@@ -38,6 +39,8 @@ export default function AdminOverviewPage() {
           </Link>
         ))}
       </div>
+
+      <RecommendationsSection />
     </div>
   )
 }

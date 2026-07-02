@@ -166,7 +166,7 @@ export default function PasswordUpdatePage() {
               </button>
             </div>
             {errors.oldPassword && (
-              <p style={{ color: '#c0392b', fontSize: '0.75rem', marginTop: '0.3rem' }}>
+              <p style={{ color: 'var(--error)', fontSize: '0.75rem', marginTop: '0.3rem' }}>
                 {errors.oldPassword}
               </p>
             )}
@@ -215,7 +215,7 @@ export default function PasswordUpdatePage() {
               </button>
             </div>
             {errors.password && (
-              <p style={{ color: '#c0392b', fontSize: '0.75rem', marginTop: '0.3rem' }}>
+              <p style={{ color: 'var(--error)', fontSize: '0.75rem', marginTop: '0.3rem' }}>
                 {errors.password}
               </p>
             )}
@@ -264,20 +264,20 @@ export default function PasswordUpdatePage() {
               </button>
             </div>
             {errors.confirmPassword && (
-              <p style={{ color: '#c0392b', fontSize: '0.75rem', marginTop: '0.3rem' }}>
+              <p style={{ color: 'var(--error)', fontSize: '0.75rem', marginTop: '0.3rem' }}>
                 {errors.confirmPassword}
               </p>
             )}
           </div>
 
           {errors.form && (
-            <p style={{ color: '#c0392b', fontSize: '0.8rem', margin: '0.75rem 0', textAlign: 'center' }}>
+            <p style={{ color: 'var(--error)', fontSize: '0.8rem', margin: '0.75rem 0', textAlign: 'center' }}>
               {errors.form}
             </p>
           )}
 
           {successMsg && (
-            <p style={{ color: '#27ae60', fontSize: '0.8rem', margin: '0.75rem 0', textAlign: 'center', fontWeight: '500' }}>
+            <p style={{ color: 'var(--success)', fontSize: '0.8rem', margin: '0.75rem 0', textAlign: 'center', fontWeight: '500' }}>
               {successMsg}
             </p>
           )}
