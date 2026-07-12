@@ -5,15 +5,18 @@ import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { useAuth } from '@/app/context/AuthContext'
 import { useTheme } from '@/app/context/ThemeContext'
+import { useLanguage } from '@/lib/i18n/context'
+import { LANGUAGES } from '@/lib/i18n/translations'
 import { logoutAction } from '@/lib/actions/auth-action'
 import api from '@/lib/api/axios'
 import Modal from './Modal'
 
-const NAV = [
-  { href: '/admin', label: 'Overview', exact: true, icon: '⊞' },
-  { href: '/admin/products', label: 'Products', exact: false, icon: '📦' },
-  { href: '/admin/orders', label: 'Orders', exact: false, icon: '📋' },
-  { href: '/admin/users', label: 'Users', exact: false, icon: '👥' },
+const NAV = (t: (p: string) => string) => [
+  { href: '/admin', label: t('admin.overview'), exact: true, icon: '⊞' },
+  { href: '/admin/analytics', label: t('admin.analytics'), exact: false, icon: '📊' },
+  { href: '/admin/products', label: t('admin.products'), exact: false, icon: '📦' },
+  { href: '/admin/orders', label: t('admin.orders'), exact: false, icon: '📋' },
+  { href: '/admin/users', label: t('admin.users'), exact: false, icon: '👥' },
 ]
 
 export default function Sidebar() {
@@ -21,6 +24,7 @@ export default function Sidebar() {
   const router = useRouter()
   const { user, updateUser } = useAuth()
   const { theme, toggleTheme } = useTheme()
+  const { language, setLanguage, t } = useLanguage()
 
   const [profileModal, setProfileModal] = useState(false)
   const [passwordModal, setPasswordModal] = useState(false)
@@ -63,7 +67,7 @@ export default function Sidebar() {
 
   const handleLogout = () => {
     logoutAction()
-    router.replace('/login')
+    window.location.href = '/login'
   }
 
   const handleProfileSubmit = async (e: React.FormEvent) => {
@@ -80,13 +84,13 @@ export default function Sidebar() {
       })
       if (data.success && data.data) {
         updateUser(data.data)
-        setProfileMsg('Profile updated successfully!')
+        setProfileMsg(t('admin.profileUpdated'))
         setAvatarFile(null)
       } else {
-        setProfileMsg(data.message || 'Failed to update profile.')
+        setProfileMsg(data.message || t('admin.profileUpdateFailed'))
       }
     } catch (err: any) {
-      setProfileMsg(err?.response?.data?.message || 'Something went wrong.')
+      setProfileMsg(t('common.somethingWentWrong'))
     } finally {
       setSubmitting(false)
     }
@@ -96,26 +100,26 @@ export default function Sidebar() {
     e.preventDefault()
     setPasswordMsg('')
     if (!oldPassword || !newPassword || newPassword.length < 8) {
-      setPasswordMsg('New password must be at least 8 characters.')
+      setPasswordMsg(t('admin.passwordMinError'))
       return
     }
     if (newPassword !== confirmPassword) {
-      setPasswordMsg('Passwords do not match.')
+      setPasswordMsg(t('admin.passwordMatchError'))
       return
     }
     setSubmitting(true)
     try {
       const { data } = await api.put('/auth/update', { oldPassword, password: newPassword })
       if (data.success) {
-        setPasswordMsg('Password updated successfully!')
+        setPasswordMsg(t('admin.passwordUpdated'))
         setOldPassword('')
         setNewPassword('')
         setConfirmPassword('')
       } else {
-        setPasswordMsg(data.message || 'Failed to update password.')
+        setPasswordMsg(data.message || t('admin.passwordUpdateFailed'))
       }
     } catch (err: any) {
-      setPasswordMsg(err?.response?.data?.message || 'Something went wrong.')
+      setPasswordMsg(t('common.somethingWentWrong'))
     } finally {
       setSubmitting(false)
     }
@@ -133,11 +137,11 @@ export default function Sidebar() {
             <span className="admin-sidebar-logo-mark" />
             <span className="admin-sidebar-logo-text">archive<br />outfitters</span>
           </div>
-          <div className="admin-sidebar-badge">Admin</div>
+          <div className="admin-sidebar-badge">{t('admin.adminBadge')}</div>
         </div>
 
-        <nav className="admin-sidebar-nav" aria-label="Admin sections">
-          {NAV.map(({ href, label, exact, icon }) => {
+        <nav className="admin-sidebar-nav" aria-label={t('admin.panel')}>
+          {NAV(t).map(({ href, label, exact, icon }) => {
             const active = isActive(href, exact)
             return (
               <Link
@@ -154,19 +158,16 @@ export default function Sidebar() {
         </nav>
 
         <div className="admin-sidebar-footer" style={{ padding: '0.75rem 1rem' }}>
-          {/* Dark mode toggle */}
           <div
             style={{
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              padding: '0.4rem 0.5rem 0.6rem',
-              marginBottom: '0.5rem',
-              borderBottom: '1px solid var(--border)',
+              padding: '0.4rem 0.5rem 0.4rem',
             }}
           >
             <span style={{ fontSize: '0.78rem', fontWeight: 500, color: 'var(--muted)' }}>
-              {theme === 'dark' ? 'Dark Mode' : 'Light Mode'}
+              {theme === 'dark' ? t('admin.darkMode') : t('admin.lightMode')}
             </span>
             <button
               onClick={toggleTheme}
@@ -225,6 +226,42 @@ export default function Sidebar() {
             style={{
               display: 'flex',
               alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '0.4rem 0.5rem 0.6rem',
+              marginBottom: '0.5rem',
+              borderBottom: '1px solid var(--border)',
+            }}
+          >
+            <span style={{ fontSize: '0.78rem', fontWeight: 500, color: 'var(--muted)' }}>
+              {t('language.label')}
+            </span>
+            <select
+              value={language}
+              onChange={(e) => setLanguage(e.target.value as any)}
+              style={{
+                fontSize: '0.75rem',
+                padding: '0.2rem 0.4rem',
+                borderRadius: '4px',
+                border: '1px solid var(--border)',
+                background: 'var(--card-bg)',
+                color: 'var(--black)',
+                cursor: 'pointer',
+                fontFamily: 'inherit',
+                outline: 'none',
+              }}
+            >
+              {LANGUAGES.map((l) => (
+                <option key={l.code} value={l.code}>
+                  {l.native}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
               gap: '0.65rem',
               marginBottom: '0.75rem',
               padding: '0.5rem 0.5rem',
@@ -241,7 +278,7 @@ export default function Sidebar() {
             </div>
             <div style={{ minWidth: 0 }}>
               <p style={{ fontWeight: 600, fontSize: '0.82rem', color: 'var(--black)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                {user?.fullName || 'Admin'}
+                {user?.fullName || t('admin.adminBadge')}
               </p>
               <p style={{ fontSize: '0.7rem', color: 'var(--muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 {user?.email || ''}
@@ -254,26 +291,26 @@ export default function Sidebar() {
             className="admin-sidebar-back"
             style={{ width: '100%', textAlign: 'left', marginBottom: '0.25rem', fontSize: '0.78rem', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}
           >
-            Update Profile
+            {t('admin.updateProfile')}
           </button>
           <button
             onClick={() => setPasswordModal(true)}
             className="admin-sidebar-back"
             style={{ width: '100%', textAlign: 'left', marginBottom: '0.25rem', fontSize: '0.78rem', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}
           >
-            Change Password
+            {t('admin.changePassword')}
           </button>
           <button
             onClick={handleLogout}
             className="admin-sidebar-back"
             style={{ width: '100%', textAlign: 'left', fontSize: '0.78rem', color: 'var(--error)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}
           >
-            Sign Out
+            {t('admin.signOut')}
           </button>
         </div>
       </aside>
 
-      <Modal open={profileModal} onClose={() => setProfileModal(false)} title="Update Profile">
+      <Modal open={profileModal} onClose={() => setProfileModal(false)} title={t('admin.updateProfileTitle')}>
         <form onSubmit={handleProfileSubmit}>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '1.25rem' }}>
             <div
@@ -291,7 +328,7 @@ export default function Sidebar() {
               )}
             </div>
             <button type="button" onClick={() => fileInputRef.current?.click()} style={{ background: 'none', border: 'none', color: 'var(--muted)', fontSize: '0.75rem', cursor: 'pointer', marginTop: '0.4rem' }}>
-              Change Photo
+              {t('admin.changePhoto')}
             </button>
             <input ref={fileInputRef} type="file" accept="image/*" style={{ display: 'none' }}
               onChange={(e) => {
@@ -305,51 +342,51 @@ export default function Sidebar() {
           </div>
 
           <div className="admin-field">
-            <label className="admin-label">Full Name</label>
+            <label className="admin-label">{t('admin.fullNameLabel')}</label>
             <input type="text" className="admin-input" value={fullName} onChange={e => setFullName(e.target.value)} required />
           </div>
           <div className="admin-field">
-            <label className="admin-label">Email</label>
+            <label className="admin-label">{t('admin.emailLabel')}</label>
             <input type="email" className="admin-input" value={email} onChange={e => setEmail(e.target.value)} required />
           </div>
 
           {profileMsg && (
-            <p style={{ color: profileMsg.includes('successfully') ? 'var(--success)' : 'var(--error)', fontSize: '0.8rem', marginBottom: '0.75rem', textAlign: 'center' }}>
+            <p style={{ color: profileMsg.includes('successfully') || profileMsg.includes('सफल') || profileMsg.includes(' éxito') || profileMsg.includes('sucesso') || profileMsg.includes('更新') ? 'var(--success)' : 'var(--error)', fontSize: '0.8rem', marginBottom: '0.75rem', textAlign: 'center' }}>
               {profileMsg}
             </p>
           )}
 
           <div className="admin-modal-actions">
-            <button type="button" onClick={() => setProfileModal(false)} className="admin-btn-secondary">Cancel</button>
-            <button type="submit" disabled={submitting} className="admin-btn-primary">{submitting ? 'Saving…' : 'Save'}</button>
+            <button type="button" onClick={() => setProfileModal(false)} className="admin-btn-secondary">{t('common.cancel')}</button>
+            <button type="submit" disabled={submitting} className="admin-btn-primary">{submitting ? t('common.saving') : t('common.save')}</button>
           </div>
         </form>
       </Modal>
 
-      <Modal open={passwordModal} onClose={() => setPasswordModal(false)} title="Change Password">
+      <Modal open={passwordModal} onClose={() => setPasswordModal(false)} title={t('admin.changePasswordTitle')}>
         <form onSubmit={handlePasswordSubmit}>
           <div className="admin-field">
-            <label className="admin-label">Current Password</label>
+            <label className="admin-label">{t('admin.currentPasswordLabel')}</label>
             <input type="password" className="admin-input" value={oldPassword} onChange={e => setOldPassword(e.target.value)} required />
           </div>
           <div className="admin-field">
-            <label className="admin-label">New Password</label>
-            <input type="password" className="admin-input" value={newPassword} onChange={e => setNewPassword(e.target.value)} required placeholder="Min 8 characters" />
+            <label className="admin-label">{t('admin.newPasswordLabel')}</label>
+            <input type="password" className="admin-input" value={newPassword} onChange={e => setNewPassword(e.target.value)} required placeholder={t('admin.minChars')} />
           </div>
           <div className="admin-field">
-            <label className="admin-label">Confirm New Password</label>
+            <label className="admin-label">{t('admin.confirmNewPasswordLabel')}</label>
             <input type="password" className="admin-input" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} required />
           </div>
 
           {passwordMsg && (
-            <p style={{ color: passwordMsg.includes('successfully') ? 'var(--success)' : 'var(--error)', fontSize: '0.8rem', marginBottom: '0.75rem', textAlign: 'center' }}>
+            <p style={{ color: passwordMsg.includes('successfully') || passwordMsg.includes('सफल') || passwordMsg.includes('éxito') || passwordMsg.includes('sucesso') || passwordMsg.includes('更新') ? 'var(--success)' : 'var(--error)', fontSize: '0.8rem', marginBottom: '0.75rem', textAlign: 'center' }}>
               {passwordMsg}
             </p>
           )}
 
           <div className="admin-modal-actions">
-            <button type="button" onClick={() => setPasswordModal(false)} className="admin-btn-secondary">Cancel</button>
-            <button type="submit" disabled={submitting} className="admin-btn-primary">{submitting ? 'Updating…' : 'Change Password'}</button>
+            <button type="button" onClick={() => setPasswordModal(false)} className="admin-btn-secondary">{t('common.cancel')}</button>
+            <button type="submit" disabled={submitting} className="admin-btn-primary">{submitting ? t('common.updating') : t('admin.changePassword')}</button>
           </div>
         </form>
       </Modal>

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useTransition } from 'react'
 import { handleGetAllOrders, handleUpdateOrderStatus } from '@/lib/actions/admin/order-action'
+import { useLanguage } from '@/lib/i18n/context'
 
 interface OrderItem {
   product: string
@@ -18,6 +19,13 @@ interface Order {
   totalPrice: number
   status: 'Pending' | 'Shipped' | 'Delivered' | 'Cancelled'
   createdAt: string
+  phone?: string
+  location?: string
+  delivery?: {
+    name: string
+    address: string
+    phone: string
+  }
 }
 
 const STATUSES = ['Pending', 'Shipped', 'Delivered', 'Cancelled'] as const
@@ -42,6 +50,8 @@ export default function AdminOrdersPage() {
   const [error, setError] = useState('')
   const [isPending, startTransition] = useTransition()
   const [toast, setToast] = useState('')
+
+  const { t } = useLanguage()
 
   useEffect(() => {
     startTransition(async () => {
@@ -84,8 +94,8 @@ export default function AdminOrdersPage() {
   return (
     <div>
       <div style={{ marginBottom: '1.5rem' }}>
-        <p className="admin-page-eyebrow">Admin</p>
-        <h1 className="admin-page-title">Orders</h1>
+        <p className="admin-page-eyebrow">{t('admin.panel')}</p>
+        <h1 className="admin-page-title">{t('admin.ordersTitle')}</h1>
         <p className="admin-page-subtitle">{orders.length} total order{orders.length !== 1 ? 's' : ''}</p>
       </div>
 
@@ -101,21 +111,22 @@ export default function AdminOrdersPage() {
         ) : orders.length === 0 ? (
           <div className="admin-state-box">
             <div className="admin-state-box-icon">📋</div>
-            <p className="admin-state-box-title">No orders yet</p>
-            <p className="admin-state-box-desc">Orders will appear here once customers start purchasing.</p>
+            <p className="admin-state-box-title">{t('admin.noOrders')}</p>
+            <p className="admin-state-box-desc">{t('admin.noOrdersDesc')}</p>
           </div>
         ) : (
           <div style={{ overflowX: 'auto' }}>
             <table className="admin-table">
               <thead>
                 <tr>
-                  <th>Order ID</th>
-                  <th>Customer</th>
-                  <th>Items</th>
-                  <th>Total</th>
-                  <th>Date</th>
-                  <th>Status</th>
-                  <th>Actions</th>
+                  <th>{t('admin.orderId')}</th>
+                  <th>{t('admin.customer')}</th>
+                  <th>{t('dashboard.deliveryDetails')}</th>
+                  <th>{t('admin.items')}</th>
+                  <th>{t('admin.total')}</th>
+                  <th>{t('admin.date')}</th>
+                  <th>{t('admin.status')}</th>
+                  <th>{t('admin.actions')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -125,8 +136,16 @@ export default function AdminOrdersPage() {
                       #{order._id.slice(-6).toUpperCase()}
                     </td>
                     <td>
-                      <div style={{ fontWeight: 600, color: 'var(--black)' }}>{order.user?.fullName || 'Unknown'}</div>
+                      <div style={{ fontWeight: 600, color: 'var(--black)' }}>{order.user?.fullName || t('admin.unknown')}</div>
                       <div style={{ fontSize: '0.78rem', color: '#888' }}>{order.user?.email || ''}</div>
+                    </td>
+                    <td>
+                      <div style={{ fontWeight: 600, color: 'var(--black)' }}>
+                        {order.delivery?.phone || order.phone || '-'}
+                      </div>
+                      <div style={{ fontSize: '0.78rem', color: '#888' }}>
+                        {order.delivery?.address || order.location || '-'}
+                      </div>
                     </td>
                     <td style={{ fontSize: '0.82rem' }}>
                       {(order.items ?? []).map((item, i) => (
@@ -149,7 +168,7 @@ export default function AdminOrdersPage() {
                         padding: '0.25rem 0.6rem',
                         borderRadius: '4px',
                       }}>
-                        {order.status ?? 'Pending'}
+                        {t('admin.' + (order.status ?? 'Pending').toLowerCase())}
                       </span>
                     </td>
                     <td>
@@ -162,7 +181,7 @@ export default function AdminOrdersPage() {
                           style={{ width: 'auto', height: '34px', fontSize: '0.75rem', paddingRight: '1.8rem' }}
                         >
                           {STATUSES.map((s) => (
-                            <option key={s} value={s}>{s}</option>
+                            <option key={s} value={s}>{t('admin.' + s.toLowerCase())}</option>
                           ))}
                         </select>
                       </div>

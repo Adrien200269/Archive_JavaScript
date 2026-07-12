@@ -4,6 +4,7 @@ import { useState, FormEvent } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useAuth } from '../../context/AuthContext'
+import { useLanguage } from '@/lib/i18n/context'
 import api from '../../../lib/api/axios'
 
 interface FormErrors {
@@ -16,6 +17,7 @@ interface FormErrors {
 export default function PasswordUpdatePage() {
   const router = useRouter()
   const { user, loading } = useAuth()
+  const { t } = useLanguage()
 
   const [oldPassword, setOldPassword] = useState<string>('')
   const [password, setPassword] = useState<string>('')
@@ -36,7 +38,7 @@ export default function PasswordUpdatePage() {
           <div className="blob blob-tl" />
           <div className="blob blob-br" />
         </div>
-        <p style={{ color: 'var(--muted)', fontSize: '0.9rem' }}>Loading session…</p>
+        <p style={{ color: 'var(--muted)', fontSize: '0.9rem' }}>{t('dashboard.loadingSession')}</p>
       </main>
     )
   }
@@ -54,21 +56,21 @@ export default function PasswordUpdatePage() {
     const newErrors: FormErrors = {}
 
     if (!oldPassword) {
-      newErrors.oldPassword = 'Current password is required'
+      newErrors.oldPassword = t('dashboard.passwordRequired')
       hasError = true
     }
     if (!password) {
       newErrors.password = 'New password is required'
       hasError = true
     } else if (password.length < 8) {
-      newErrors.password = 'New password must be at least 8 characters'
+      newErrors.password = t('dashboard.passwordLength')
       hasError = true
     }
     if (!confirmPassword) {
-      newErrors.confirmPassword = 'Please confirm your new password'
+      newErrors.confirmPassword = t('dashboard.passwordConfirm')
       hasError = true
     } else if (password !== confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match'
+      newErrors.confirmPassword = t('dashboard.passwordMatch')
       hasError = true
     }
 
@@ -85,12 +87,12 @@ export default function PasswordUpdatePage() {
       })
 
       if (data.success) {
-        setSuccessMsg('Password updated successfully!')
+        setSuccessMsg(t('dashboard.passwordUpdated'))
         setOldPassword('')
         setPassword('')
         setConfirmPassword('')
       } else {
-        setErrors({ form: data.message || 'Failed to update password.' })
+        setErrors({ form: data.message || t('dashboard.passwordUpdateFailed') })
       }
     } catch (err: any) {
       const respData = err?.response?.data
@@ -101,7 +103,7 @@ export default function PasswordUpdatePage() {
         })
         setErrors(fieldErrors)
       } else {
-        setErrors({ form: respData?.message || 'Something went wrong. Please try again.' })
+        setErrors({ form: respData?.message || t('common.somethingWentWrong') })
       }
     } finally {
       setSubmitting(false)
@@ -120,13 +122,13 @@ export default function PasswordUpdatePage() {
       </div>
 
       <div className="form-card fade-up d2" style={{ maxWidth: '400px' }}>
-        <div className="form-title" style={{ textAlign: 'center', marginBottom: '1.5rem' }}>Update Password</div>
+        <div className="form-title" style={{ textAlign: 'center', marginBottom: '1.5rem' }}>{t('dashboard.updatePassword')}</div>
 
         <form onSubmit={handleSubmit} noValidate>
           {/* Current Password */}
           <div className="field">
             <div className="field-header">
-              <label className="field-label" htmlFor="oldPassword">Current Password</label>
+              <label className="field-label" htmlFor="oldPassword">{t('auth.currentPassword')}</label>
             </div>
             <div className="input-row">
               <span className="input-icon">
@@ -143,7 +145,7 @@ export default function PasswordUpdatePage() {
                   setOldPassword(e.target.value)
                   if (errors.oldPassword) setErrors(prev => ({ ...prev, oldPassword: '' }))
                 }}
-                placeholder="Current Password"
+                placeholder={t('auth.currentPassword')}
               />
               <button
                 type="button"
@@ -175,7 +177,7 @@ export default function PasswordUpdatePage() {
           {/* New Password */}
           <div className="field">
             <div className="field-header">
-              <label className="field-label" htmlFor="password">New Password</label>
+              <label className="field-label" htmlFor="password">{t('auth.newPassword')}</label>
             </div>
             <div className="input-row">
               <span className="input-icon">
@@ -192,7 +194,7 @@ export default function PasswordUpdatePage() {
                   setPassword(e.target.value)
                   if (errors.password) setErrors(prev => ({ ...prev, password: '' }))
                 }}
-                placeholder="New Password (min 8 chars)"
+                placeholder={t('auth.newPasswordPlaceholder')}
               />
               <button
                 type="button"
@@ -224,7 +226,7 @@ export default function PasswordUpdatePage() {
           {/* Confirm Password */}
           <div className="field">
             <div className="field-header">
-              <label className="field-label" htmlFor="confirmPassword">Confirm New Password</label>
+              <label className="field-label" htmlFor="confirmPassword">{t('auth.confirmNewPassword')}</label>
             </div>
             <div className="input-row">
               <span className="input-icon">
@@ -241,7 +243,7 @@ export default function PasswordUpdatePage() {
                   setConfirmPassword(e.target.value)
                   if (errors.confirmPassword) setErrors(prev => ({ ...prev, confirmPassword: '' }))
                 }}
-                placeholder="Confirm Password"
+                placeholder={t('auth.confirmPlaceholder2')}
               />
               <button
                 type="button"
@@ -288,13 +290,13 @@ export default function PasswordUpdatePage() {
             disabled={submitting}
             style={{ opacity: submitting ? 0.7 : 1, marginTop: '1.25rem' }}
           >
-            {submitting ? 'Updating…' : 'Change Password'}
+            {submitting ? t('common.updating') : t('dashboard.changePassword')}
           </button>
         </form>
 
         <div style={{ marginTop: '1.5rem', textAlign: 'center' }}>
           <Link href="/dashboard" style={{ fontSize: '0.85rem', color: 'var(--muted)', textDecoration: 'none', fontWeight: '500' }}>
-            ← Back to Dashboard
+            {t('dashboard.backToDashboard')}
           </Link>
         </div>
       </div>

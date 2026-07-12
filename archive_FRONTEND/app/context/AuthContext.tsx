@@ -1,6 +1,6 @@
 'use client'
 
-import React, { createContext, useContext, useState, useEffect } from 'react'
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react'
 import Cookies from 'js-cookie'
 import api from '../../lib/api/axios'
 import { ENDPOINTS } from '../../lib/api/endpoints'
@@ -14,6 +14,16 @@ interface AuthContextType {
   updateUser: (user: User) => void
 }
 
+function getUserFromCookie(): User | null {
+  const raw = Cookies.get('user')
+  if (!raw) return null
+  try {
+    return JSON.parse(raw) as User
+  } catch {
+    return null
+  }
+}
+
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -21,25 +31,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState<boolean>(true)
 
   useEffect(() => {
+    let cancelled = false
     async function checkAuth() {
       try {
         const { data } = await api.get(ENDPOINTS.auth.whoami)
         if (data.success && data.data) {
           const loadedUser = data.data as User
-          setUser(loadedUser)
+          if (!cancelled) setUser(loadedUser)
           Cookies.set('user', JSON.stringify(loadedUser), { expires: 7, sameSite: 'lax', path: '/' })
-        } else {
-          throw new Error('Not authenticated')
+          return
         }
-      } catch (err) {
-        setUser(null)
-        Cookies.remove('user')
-        Cookies.remove('token')
+      } catch {
+        // API unavailable — fall through to cookie fallback
       } finally {
-        setLoading(false)
+        if (!cancelled) {
+          // Fallback: use user cookie if whoami failed
+          const cookieUser = getUserFromCookie()
+          if (cookieUser) {
+            setUser(cookieUser)
+          } else {
+            setUser(null)
+            Cookies.remove('user', { path: '/' })
+            Cookies.remove('token', { path: '/' })
+          }
+          setLoading(false)
+        }
       }
     }
     checkAuth()
+    return () => { cancelled = true }
   }, [])
 
   const login = (userData: User, token: string) => {
@@ -55,8 +75,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Ignored
     }
     setUser(null)
-    Cookies.remove('token')
-    Cookies.remove('user')
+    Cookies.remove('token', { path: '/' })
+    Cookies.remove('user', { path: '/' })
   }
 
   const updateUser = (userData: User) => {

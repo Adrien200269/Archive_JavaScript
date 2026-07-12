@@ -7,6 +7,8 @@ import GoogleIcon from '../components/GoogleIcon'
 import FacebookIcon from '../components/FacebookIcon'
 import { LoginSchema } from '../../lib/types/auth'
 import { loginAction } from '../../lib/actions/auth-action'
+import { useLanguage } from '../../lib/i18n/context'
+import { useAuth } from '../context/AuthContext'
 
 interface FormErrors {
   email?: string
@@ -15,6 +17,8 @@ interface FormErrors {
 }
 
 export default function LoginPage() {
+  const { t } = useLanguage()
+  const { login } = useAuth()
   const router = useRouter()
   const [email, setEmail]       = useState<string>('')
   const [password, setPassword] = useState<string>('')
@@ -27,11 +31,11 @@ export default function LoginPage() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
     if (params.get('reset') === 'success') {
-      setResetSuccess('Password reset successfully! You can now log in.')
+      setResetSuccess(t('auth.codeSent'))
       window.history.replaceState({}, '', '/login')
     }
     if (params.get('oauth') === 'failed') {
-      setOauthError('Social login failed. Please try again or use email.')
+      setOauthError(t('auth.oauthFailed'))
       window.history.replaceState({}, '', '/login')
     }
   }, [])
@@ -59,7 +63,8 @@ export default function LoginPage() {
       return
     }
 
-    // 4. On success, redirect based on role
+    // 4. Update AuthContext and redirect based on role
+    login(res.data.user, res.data.token)
     router.push(res.data.user.role === 'admin' ? '/admin' : '/dashboard')
   }
 
@@ -81,13 +86,13 @@ export default function LoginPage() {
 
       {/* Card */}
       <div className="form-card fade-up d2">
-        <div className="form-title">Welcome Back</div>
+        <div className="form-title">{t('auth.welcomeBack')}</div>
 
         <form onSubmit={handleSubmit} noValidate>
           {/* Email */}
           <div className="field">
             <div className="field-header">
-              <label className="field-label" htmlFor="email">Email Address</label>
+              <label className="field-label" htmlFor="email">{t('auth.email')}</label>
             </div>
             <div className="input-row">
               <span className="input-icon" aria-hidden="true">
@@ -105,7 +110,7 @@ export default function LoginPage() {
                   setEmail(e.target.value)
                   clearError('email')
                 }}
-                placeholder="you@example.com"
+                placeholder={t('auth.emailPlaceholder')}
               />
             </div>
             {errors.email && (
@@ -118,8 +123,8 @@ export default function LoginPage() {
           {/* Password */}
           <div className="field">
             <div className="field-header">
-              <label className="field-label" htmlFor="password">Password</label>
-              <Link href="/forgot-password" className="field-forgot">Forgot?</Link>
+              <label className="field-label" htmlFor="password">{t('auth.password')}</label>
+              <Link href="/forgot-password" className="field-forgot">{t('auth.forgotPassword')}</Link>
             </div>
             <div className="input-row">
               <span className="input-icon" aria-hidden="true">
@@ -190,11 +195,11 @@ export default function LoginPage() {
             disabled={loading}
             style={{ opacity: loading ? 0.7 : 1 }}
           >
-            {loading ? 'Signing in…' : 'Login'}
+            {loading ? t('auth.signIn') : t('auth.login')}
           </button>
         </form>
 
-        <div className="or-divider">or continue with</div>
+        <div className="or-divider">{t('auth.orContinueWith')}</div>
         <div className="social-row">
           <a href="/api/v1/auth/google" className="btn-social btn-google" style={{ textDecoration: 'none' }}>
             <GoogleIcon /> Google
@@ -206,8 +211,8 @@ export default function LoginPage() {
       </div>
 
       <p className="nav-text fade-up d4">
-        Don&apos;t have an account?{' '}
-        <Link href="/register">Sign up</Link>
+        {t('auth.noAccount')}{' '}
+        <Link href="/register">{t('auth.signUp')}</Link>
       </p>
     </main>
   )

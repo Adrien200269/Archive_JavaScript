@@ -7,6 +7,7 @@ import GoogleIcon from '../components/GoogleIcon'
 import FacebookIcon from '../components/FacebookIcon'
 import { RegisterSchema } from '../../lib/types/auth'
 import { registerAction } from '../../lib/actions/auth-action'
+import { useLanguage } from '../../lib/i18n/context'
 
 /* ── Icon components ── */
 const IconUser = () => (
@@ -95,6 +96,7 @@ const Field = ({ id, label, icon, children, error }: FieldProps) => (
 )
 
 export default function RegisterPage() {
+  const { t } = useLanguage()
   const router = useRouter()
   const [form, setForm] = useState<FormState>({
     fullName: '', email: '', dob: '', password: '', confirmPassword: '',
@@ -167,23 +169,23 @@ export default function RegisterPage() {
       <div className="form-card fade-up d2">
         <form onSubmit={handleSubmit} noValidate>
 
-          <Field id="fullName" label="Full Name" icon={<IconUser />} error={errors.fullName}>
+          <Field id="fullName" label={t('auth.fullName')} icon={<IconUser />} error={errors.fullName}>
             <input
               id="fullName" type="text" autoComplete="name"
-              placeholder="Jane Doe"
+              placeholder={t('auth.namePlaceholder')}
               value={form.fullName} onChange={handleChange('fullName')}
             />
           </Field>
 
-          <Field id="email" label="Email" icon={<IconMail />} error={errors.email}>
+          <Field id="email" label={t('auth.email')} icon={<IconMail />} error={errors.email}>
             <input
               id="email" type="email" autoComplete="email"
-              placeholder="you@example.com"
+              placeholder={t('auth.emailPlaceholder')}
               value={form.email} onChange={handleChange('email')}
             />
           </Field>
 
-          <Field id="dob" label="Date of Birth" icon={<IconCalendar />} error={errors.dob}>
+          <Field id="dob" label={t('auth.dob')} icon={<IconCalendar />} error={errors.dob}>
             <input
               id="dob" type="date"
               style={{ color: form.dob ? 'var(--black)' : '#bbb' }}
@@ -191,18 +193,18 @@ export default function RegisterPage() {
             />
           </Field>
 
-          <Field id="password" label="Password" icon={<IconLock />} error={errors.password}>
+          <Field id="password" label={t('auth.password')} icon={<IconLock />} error={errors.password}>
             <input
               id="password" type="password" autoComplete="new-password"
-              placeholder="Min. 8 characters"
+              placeholder={t('auth.passwordPlaceholder')}
               value={form.password} onChange={handleChange('password')}
             />
           </Field>
 
-          <Field id="confirmPassword" label="Confirm Password" icon={<IconShield />} error={errors.confirmPassword}>
+          <Field id="confirmPassword" label={t('auth.confirmPassword')} icon={<IconShield />} error={errors.confirmPassword}>
             <input
               id="confirmPassword" type="password" autoComplete="new-password"
-              placeholder="Repeat your password"
+              placeholder={t('auth.confirmPlaceholder')}
               value={form.confirmPassword}
               onChange={handleChange('confirmPassword')}
               style={{
@@ -226,11 +228,11 @@ export default function RegisterPage() {
             disabled={loading}
             style={{ opacity: loading ? 0.75 : 1 }}
           >
-            {loading ? 'Creating account…' : <><span>Create Account</span> <IconArrowRight /></>}
+            {loading ? t('auth.creating') : <><span>{t('auth.createAccount')}</span> <IconArrowRight /></>}
           </button>
         </form>
 
-        <div className="or-divider">or continue with</div>
+        <div className="or-divider">{t('auth.orContinueWith')}</div>
         <div className="social-row">
           <a href="/api/v1/auth/google" className="btn-social btn-google" style={{ textDecoration: 'none' }}>
             <GoogleIcon /> Google
@@ -242,8 +244,8 @@ export default function RegisterPage() {
       </div>
 
       <p className="nav-text fade-up d4">
-        Already have an account?{' '}
-        <Link href="/login" className="blue">Log in</Link>
+        {t('auth.hasAccount')}{' '}
+        <Link href="/login" className="blue">{t('auth.logIn')}</Link>
       </p>
     </main>
   )

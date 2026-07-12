@@ -66,8 +66,8 @@ export async function loginAction(
 }
 
 export function logoutAction() {
-  Cookies.remove('token')
-  Cookies.remove('user')
+  Cookies.remove('token', { path: '/' })
+  Cookies.remove('user', { path: '/' })
   // fire-and-forget call to clear the httpOnly cookie too
   api.post(ENDPOINTS.auth.logout).catch(() => {})
 }

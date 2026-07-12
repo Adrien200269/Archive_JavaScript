@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useAuth } from '../context/AuthContext'
 import { useTheme } from '../context/ThemeContext'
+import { useLanguage } from '../../lib/i18n/context'
+import { LANGUAGES } from '../../lib/i18n/translations'
 import { productService, Product } from '../../lib/api/product'
 import { recommendationService } from '../../lib/api/recommendation'
 import { orderService, Order } from '../../lib/api/order'
@@ -18,6 +20,7 @@ export default function DashboardPage() {
   const router = useRouter()
   const { user, loading: authLoading, logout } = useAuth()
   const { theme, toggleTheme } = useTheme()
+  const { language, setLanguage, t } = useLanguage()
   
   // Navigation tabs: 'home' | 'orders' | 'profile'
   const [activeTab, setActiveTab] = useState<'home' | 'orders' | 'profile'>('home')
@@ -60,7 +63,7 @@ export default function DashboardPage() {
         const data = await productService.getProducts()
         setProducts(data)
       } catch (err: any) {
-        setProductError(err?.message || 'Failed to load products')
+        setProductError(err?.message || t('dashboard.productsLoadFailed'))
       } finally {
         setLoadingProducts(false)
       }
@@ -90,7 +93,7 @@ export default function DashboardPage() {
         const data = await orderService.getMyOrders()
         setOrders(data)
       } catch (err: any) {
-        setOrdersError(err?.message || 'Failed to load orders')
+        setOrdersError(err?.message || t('dashboard.ordersLoadFailed'))
       } finally {
         setLoadingOrders(false)
       }
@@ -116,7 +119,7 @@ export default function DashboardPage() {
 
   const handleLogout = async () => {
     await logout()
-    router.replace('/login')
+    window.location.href = '/login'
   }
 
   const addToCart = (product: Product) => {
@@ -149,7 +152,7 @@ export default function DashboardPage() {
   const handleCheckout = async () => {
     if (cartItems.length === 0) return
     if (!deliveryName.trim() || !deliveryAddress.trim() || !deliveryPhone.trim()) {
-      setCheckoutMessage('Please fill in delivery details')
+      setCheckoutMessage(t('dashboard.fillDelivery'))
       setTimeout(() => setCheckoutMessage(''), 3000)
       return
     }
@@ -167,10 +170,10 @@ export default function DashboardPage() {
       })
       setCartItems([])
       setCartOpen(false)
-      setCheckoutMessage('Order placed successfully!')
+      setCheckoutMessage(t('dashboard.orderPlaced'))
       setTimeout(() => setCheckoutMessage(''), 3000)
     } catch (err: any) {
-      setCheckoutMessage(err?.response?.data?.message || err?.message || 'Checkout failed')
+      setCheckoutMessage(err?.response?.data?.message || err?.message || t('dashboard.checkoutFailed'))
       setTimeout(() => setCheckoutMessage(''), 3000)
     } finally {
       setCheckoutLoading(false)
@@ -184,7 +187,7 @@ export default function DashboardPage() {
           <div className="blob blob-tl" />
           <div className="blob blob-br" />
         </div>
-        <p style={{ color: 'var(--muted)', fontSize: '0.9rem' }}>Loading session…</p>
+        <p style={{ color: 'var(--muted)', fontSize: '0.9rem' }}>{t('dashboard.loadingSession')}</p>
       </main>
     )
   }
@@ -239,7 +242,7 @@ export default function DashboardPage() {
             transition: 'color 0.2s ease, transform 0.2s ease',
             transform: favoritesOnly ? 'scale(1.1)' : 'scale(1)'
           }}
-          title={favoritesOnly ? "Show All Products" : "Show Favorites Only"}
+          title={favoritesOnly ? t('dashboard.showAll') : t('dashboard.showFavOnly')}
         >
           <svg width="24" height="24" viewBox="0 0 24 24" fill={favoritesOnly ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2">
             <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
@@ -255,7 +258,7 @@ export default function DashboardPage() {
         }}>
           <input
             type="text"
-            placeholder="Search products..."
+            placeholder={t('dashboard.searchProducts')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             style={{
@@ -346,7 +349,7 @@ export default function DashboardPage() {
               letterSpacing: '-0.02em',
               lineHeight: 1.1
             }}>
-              {favoritesOnly ? "Favourites" : "Most Selling"}
+              {favoritesOnly ? t('dashboard.favourites') : t('dashboard.mostSelling')}
             </h1>
 
             {/* AI Age-Based Recommendations */}
@@ -371,7 +374,7 @@ export default function DashboardPage() {
                     textTransform: 'uppercase',
                     color: 'var(--blue)',
                   }}>
-                    AI Picked for You
+                    {t('dashboard.aiPicked')}
                   </span>
                 </div>
                 <div style={{
@@ -440,7 +443,7 @@ export default function DashboardPage() {
                             cursor: 'pointer',
                           }}
                         >
-                          Add to Cart
+                          {t('dashboard.addToCart')}
                         </button>
                       </div>
                     </div>
@@ -451,7 +454,7 @@ export default function DashboardPage() {
 
             {loadingProducts ? (
               <div style={{ display: 'flex', justifyContent: 'center', padding: '4rem 0' }}>
-                <p style={{ color: 'var(--muted)', fontSize: '0.9rem' }}>Loading products…</p>
+                <p style={{ color: 'var(--muted)', fontSize: '0.9rem' }}>{t('dashboard.loadingProducts')}</p>
               </div>
             ) : productError ? (
               <div style={{
@@ -473,8 +476,8 @@ export default function DashboardPage() {
                 borderRadius: '12px',
                 color: 'var(--muted)'
               }}>
-                <p style={{ fontSize: '1.1rem', fontWeight: 500, marginBottom: '0.5rem', color: 'var(--black)' }}>No products found</p>
-                <p style={{ fontSize: '0.85rem' }}>Try altering your search query or wishlist filters.</p>
+                <p style={{ fontSize: '1.1rem', fontWeight: 500, marginBottom: '0.5rem', color: 'var(--black)' }}>{t('dashboard.noProducts')}</p>
+                <p style={{ fontSize: '0.85rem' }}>{t('dashboard.noProductsDesc')}</p>
               </div>
             ) : (
               <div style={{
@@ -596,7 +599,7 @@ export default function DashboardPage() {
                           <circle cx="20" cy="21" r="1"/>
                           <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
                         </svg>
-                        Add to Cart
+                        {t('dashboard.addToCart')}
                       </button>
                     </div>
                   </div>
@@ -618,12 +621,12 @@ export default function DashboardPage() {
               color: 'var(--black)',
               letterSpacing: '-0.02em'
             }}>
-              Order History
+              {t('dashboard.orderHistory')}
             </h1>
 
             {loadingOrders ? (
               <div style={{ display: 'flex', justifyContent: 'center', padding: '4rem 0' }}>
-                <p style={{ color: 'var(--muted)', fontSize: '0.9rem' }}>Loading orders…</p>
+                <p style={{ color: 'var(--muted)', fontSize: '0.9rem' }}>{t('dashboard.loadingOrders')}</p>
               </div>
             ) : ordersError ? (
               <div style={{
@@ -645,8 +648,8 @@ export default function DashboardPage() {
                 textAlign: 'center',
                 color: 'var(--muted)'
               }}>
-                <p style={{ fontSize: '1.1rem', fontWeight: 500, marginBottom: '0.5rem', color: 'var(--black)' }}>No orders yet</p>
-                <p style={{ fontSize: '0.85rem' }}>Start shopping to see your orders here.</p>
+                <p style={{ fontSize: '1.1rem', fontWeight: 500, marginBottom: '0.5rem', color: 'var(--black)' }}>{t('dashboard.noOrders')}</p>
+                <p style={{ fontSize: '0.85rem' }}>{t('dashboard.noOrdersDesc')}</p>
               </div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
@@ -690,7 +693,7 @@ export default function DashboardPage() {
                     </div>
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-                      {order.items.map((item, i) => (
+                      {(order.items ?? []).map((item, i) => (
                         <div key={i} style={{
                           display: 'flex',
                           gap: '0.75rem',
@@ -708,10 +711,10 @@ export default function DashboardPage() {
                           </div>
                           <div style={{ flex: 1, minWidth: 0 }}>
                             <p style={{ fontWeight: 600, fontSize: '0.85rem', color: 'var(--black)' }}>{item.name}</p>
-                            <p style={{ fontSize: '0.78rem', color: 'var(--muted)' }}>Qty: {item.quantity}</p>
+                            <p style={{ fontSize: '0.78rem', color: 'var(--muted)' }}>{t('dashboard.qty')}: {item.quantity}</p>
                           </div>
                           <p style={{ fontWeight: 600, fontSize: '0.85rem', color: 'var(--black)', whiteSpace: 'nowrap' }}>
-                            ₹{(item.price * item.quantity).toLocaleString()}
+                            ₹{((item.price ?? 0) * (item.quantity ?? 1)).toLocaleString()}
                           </p>
                         </div>
                       ))}
@@ -725,7 +728,7 @@ export default function DashboardPage() {
                         fontSize: '0.78rem',
                         color: 'var(--muted)',
                       }}>
-                        Deliver to: {order.delivery.address} · {order.delivery.phone}
+                        {t('dashboard.deliverTo')}: {order.delivery.address} · {order.delivery.phone}
                       </div>
                     )}
 
@@ -737,9 +740,9 @@ export default function DashboardPage() {
                       justifyContent: 'space-between',
                       alignItems: 'center',
                     }}>
-                      <span style={{ fontSize: '0.82rem', color: 'var(--muted)' }}>Total</span>
+                      <span style={{ fontSize: '0.82rem', color: 'var(--muted)' }}>{t('dashboard.total')}</span>
                       <span style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--black)' }}>
-                        ₹{order.totalPrice.toLocaleString()}
+                        ₹{(order.totalPrice ?? (order.items ?? []).reduce((sum, item) => sum + (item.price ?? 0) * (item.quantity ?? 1), 0)).toLocaleString()}
                       </span>
                     </div>
                   </div>
@@ -766,7 +769,7 @@ export default function DashboardPage() {
               color: 'var(--black)',
               letterSpacing: '-0.02em'
             }}>
-              Account Settings
+              {t('dashboard.accountSettings')}
             </h1>
 
             <div className="form-card" style={{ width: '100%', maxWidth: '420px' }}>
@@ -775,15 +778,15 @@ export default function DashboardPage() {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                paddingBottom: '1.25rem',
-                marginBottom: '1.25rem',
+                paddingBottom: '1rem',
+                marginBottom: '1rem',
                 borderBottom: '1px solid var(--border)',
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--muted)' }}>
                     <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
                   </svg>
-                  <span style={{ fontSize: '0.9rem', fontWeight: 500, color: 'var(--black)' }}>Theme</span>
+                  <span style={{ fontSize: '0.9rem', fontWeight: 500, color: 'var(--black)' }}>{t('dashboard.theme')}</span>
                 </div>
                 <button
                   onClick={toggleTheme}
@@ -833,6 +836,46 @@ export default function DashboardPage() {
                     )}
                   </div>
                 </button>
+              </div>
+
+              {/* Language Selector */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                paddingBottom: '1.25rem',
+                marginBottom: '1.25rem',
+                borderBottom: '1px solid var(--border)',
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--muted)' }}>
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="2" y1="12" x2="22" y2="12"/>
+                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                  </svg>
+                  <span style={{ fontSize: '0.9rem', fontWeight: 500, color: 'var(--black)' }}>Language</span>
+                </div>
+                <select
+                  value={language}
+                  onChange={(e) => setLanguage(e.target.value as any)}
+                  style={{
+                    fontSize: '0.85rem',
+                    padding: '0.35rem 0.6rem',
+                    borderRadius: '6px',
+                    border: '1px solid var(--border)',
+                    background: 'var(--input-bg)',
+                    color: 'var(--black)',
+                    cursor: 'pointer',
+                    fontFamily: 'inherit',
+                    outline: 'none',
+                  }}
+                >
+                  {LANGUAGES.map((l) => (
+                    <option key={l.code} value={l.code}>
+                      {l.native}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               {/* Profile Avatar & Info */}
@@ -887,7 +930,7 @@ export default function DashboardPage() {
                   color: 'var(--muted)',
                   marginBottom: '0.25rem',
                 }}>
-                  Account
+                  {t('dashboard.account')}
                 </div>
 
                 <Link href="/dashboard/profile"
@@ -911,7 +954,7 @@ export default function DashboardPage() {
                     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
                     <circle cx="12" cy="7" r="4"/>
                   </svg>
-                  <span style={{ flex: 1 }}>Edit Profile</span>
+                  <span style={{ flex: 1 }}>{t('dashboard.editProfile')}</span>
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--muted)' }}>
                     <polyline points="9 18 15 12 9 6"/>
                   </svg>
@@ -938,7 +981,7 @@ export default function DashboardPage() {
                     <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
                     <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
                   </svg>
-                  <span style={{ flex: 1 }}>Change Password</span>
+                  <span style={{ flex: 1 }}>{t('dashboard.changePassword')}</span>
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--muted)' }}>
                     <polyline points="9 18 15 12 9 6"/>
                   </svg>
@@ -953,7 +996,7 @@ export default function DashboardPage() {
                   marginTop: '0.75rem',
                   marginBottom: '0.25rem',
                 }}>
-                  Access
+                  {t('dashboard.access')}
                 </div>
 
                 {user.role === 'admin' && (
@@ -980,12 +1023,81 @@ export default function DashboardPage() {
                       <rect x="14" y="14" width="7" height="7"/>
                       <rect x="3" y="14" width="7" height="7"/>
                     </svg>
-                    <span style={{ flex: 1 }}>Admin Panel</span>
+                    <span style={{ flex: 1 }}>{t('dashboard.adminPanel')}</span>
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--muted)' }}>
                       <polyline points="9 18 15 12 9 6"/>
                     </svg>
                   </Link>
                 )}
+
+                <div style={{
+                  fontSize: '0.7rem',
+                  fontWeight: 700,
+                  letterSpacing: '0.12em',
+                  textTransform: 'uppercase',
+                  color: 'var(--muted)',
+                  marginTop: '0.75rem',
+                  marginBottom: '0.25rem',
+                }}>
+                  Support
+                </div>
+
+                <Link href="/help"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.75rem',
+                    padding: '0.75rem 1rem',
+                    borderRadius: '10px',
+                    backgroundColor: 'var(--input-bg)',
+                    color: 'var(--black)',
+                    textDecoration: 'none',
+                    fontSize: '0.9rem',
+                    fontWeight: 500,
+                    transition: 'background-color 0.15s',
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.backgroundColor = 'var(--border)'}
+                  onMouseLeave={e => e.currentTarget.style.backgroundColor = 'var(--input-bg)'}
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, color: 'var(--muted)' }}>
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                    <line x1="12" y1="17" x2="12.01" y2="17"/>
+                  </svg>
+                  <span style={{ flex: 1 }}>{t('dashboard.helpCenter')}</span>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--muted)' }}>
+                    <polyline points="9 18 15 12 9 6"/>
+                  </svg>
+                </Link>
+
+                <Link href="/privacy"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.75rem',
+                    padding: '0.75rem 1rem',
+                    borderRadius: '10px',
+                    backgroundColor: 'var(--input-bg)',
+                    color: 'var(--black)',
+                    textDecoration: 'none',
+                    fontSize: '0.9rem',
+                    fontWeight: 500,
+                    transition: 'background-color 0.15s',
+                    marginBottom: '0.75rem',
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.backgroundColor = 'var(--border)'}
+                  onMouseLeave={e => e.currentTarget.style.backgroundColor = 'var(--input-bg)'}
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, color: 'var(--muted)' }}>
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                    <line x1="3" y1="9" x2="21" y2="9"/>
+                    <line x1="9" y1="21" x2="9" y2="9"/>
+                  </svg>
+                  <span style={{ flex: 1 }}>{t('dashboard.privacyPolicy')}</span>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--muted)' }}>
+                    <polyline points="9 18 15 12 9 6"/>
+                  </svg>
+                </Link>
 
                 <button
                   onClick={handleLogout}
@@ -1004,7 +1116,6 @@ export default function DashboardPage() {
                     cursor: 'pointer',
                     fontFamily: 'inherit',
                     transition: 'background-color 0.15s',
-                    marginTop: '0.5rem',
                   }}
                   onMouseEnter={e => e.currentTarget.style.backgroundColor = 'var(--input-bg)'}
                   onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
@@ -1014,7 +1125,7 @@ export default function DashboardPage() {
                     <polyline points="16 17 21 12 16 7"/>
                     <line x1="21" y1="12" x2="9" y2="12"/>
                   </svg>
-                  <span style={{ flex: 1 }}>Log Out</span>
+                  <span style={{ flex: 1 }}>{t('dashboard.logOut')}</span>
                 </button>
               </div>
             </div>
@@ -1055,7 +1166,7 @@ export default function DashboardPage() {
               borderBottom: '1px solid var(--border)',
             }}>
               <h2 style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--black)', margin: 0 }}>
-                Cart ({cartCount})
+                {t('dashboard.cart')} ({cartCount})
               </h2>
               <button
                 onClick={() => setCartOpen(false)}
@@ -1089,7 +1200,7 @@ export default function DashboardPage() {
                     <circle cx="20" cy="21" r="1"/>
                     <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
                   </svg>
-                  <p style={{ marginTop: '1rem', fontSize: '0.9rem' }}>Your cart is empty</p>
+                  <p style={{ marginTop: '1rem', fontSize: '0.9rem' }}>{t('dashboard.cartEmpty')}</p>
                 </div>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -1178,12 +1289,12 @@ export default function DashboardPage() {
                 padding: '1.25rem 1.5rem',
               }}>
                 <p style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--muted)', marginBottom: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                  Delivery Details
+                  {t('dashboard.deliveryDetails')}
                 </p>
                 <div className="admin-field" style={{ marginBottom: '0.6rem' }}>
                   <input
                     type="text"
-                    placeholder="Full Name"
+                    placeholder={t('dashboard.fullName')}
                     className="admin-input"
                     value={deliveryName}
                     onChange={e => setDeliveryName(e.target.value)}
@@ -1194,7 +1305,7 @@ export default function DashboardPage() {
                 <div className="admin-field" style={{ marginBottom: '0.6rem' }}>
                   <input
                     type="text"
-                    placeholder="Phone Number"
+                    placeholder={t('dashboard.phoneNumber')}
                     className="admin-input"
                     value={deliveryPhone}
                     onChange={e => setDeliveryPhone(e.target.value)}
@@ -1204,7 +1315,7 @@ export default function DashboardPage() {
                 </div>
                 <div className="admin-field" style={{ marginBottom: '0.8rem' }}>
                   <textarea
-                    placeholder="Delivery Address"
+                    placeholder={t('dashboard.deliveryAddress')}
                     className="admin-input"
                     value={deliveryAddress}
                     onChange={e => setDeliveryAddress(e.target.value)}
@@ -1218,7 +1329,7 @@ export default function DashboardPage() {
                   alignItems: 'center',
                   marginBottom: '1rem',
                 }}>
-                  <span style={{ fontSize: '0.9rem', color: 'var(--muted)' }}>Total</span>
+                  <span style={{ fontSize: '0.9rem', color: 'var(--muted)' }}>{t('dashboard.total')}</span>
                   <span style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--black)' }}>
                     ₹{cartTotal.toLocaleString()}
                   </span>
@@ -1240,7 +1351,7 @@ export default function DashboardPage() {
                     transition: 'opacity 0.2s',
                   }}
                 >
-                  {checkoutLoading ? 'Placing Order…' : 'Checkout'}
+                  {checkoutLoading ? t('dashboard.placingOrder') : t('dashboard.checkout')}
                 </button>
               </div>
             )}

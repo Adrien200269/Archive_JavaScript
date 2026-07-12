@@ -8,6 +8,7 @@ import adminUserRoutes from "./routes/admin/user.route";
 import productRoutes from "./routes/product.route";
 import orderRoutes from "./routes/order.route";
 import adminOrderRoutes from "./routes/admin/order.route";
+import adminAnalyticsRoutes from "./routes/admin/analytics.route";
 import recommendationRoutes from "./routes/recommendation.route";
 import { errorHandler } from "./middleware/error.middleware";
 
@@ -32,6 +33,7 @@ app.get("/", (_req, res) => res.json({ status: "Archive Outfitters API is runnin
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/admin/users", adminUserRoutes);
 app.use("/api/v1/admin/orders", adminOrderRoutes);
+app.use("/api/v1/admin/analytics", adminAnalyticsRoutes);
 app.use("/api/v1/products", productRoutes);
 app.use("/api/v1/orders", orderRoutes);
 app.use("/api/v1/recommendations", recommendationRoutes);

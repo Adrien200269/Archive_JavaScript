@@ -4,6 +4,7 @@ import { useState, useEffect, FormEvent, ChangeEvent, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useAuth } from '../../context/AuthContext'
+import { useLanguage } from '../../../lib/i18n/context'
 import api from '../../../lib/api/axios'
 
 interface FormErrors {
@@ -16,6 +17,7 @@ interface FormErrors {
 export default function ProfileUpdatePage() {
   const router = useRouter()
   const { user, loading, updateUser } = useAuth()
+  const { t } = useLanguage()
 
   const [fullName, setFullName] = useState<string>('')
   const [email, setEmail] = useState<string>('')
@@ -45,7 +47,7 @@ export default function ProfileUpdatePage() {
           <div className="blob blob-tl" />
           <div className="blob blob-br" />
         </div>
-        <p style={{ color: 'var(--muted)', fontSize: '0.9rem' }}>Loading session…</p>
+        <p style={{ color: 'var(--muted)', fontSize: '0.9rem' }}>{t('dashboard.loadingSession')}</p>
       </main>
     )
   }
@@ -73,12 +75,12 @@ export default function ProfileUpdatePage() {
 
     // Quick client-side checks
     if (!fullName.trim()) {
-      setErrors({ fullName: 'Full name is required' })
+      setErrors({ fullName: t('dashboard.nameRequired') })
       setSubmitting(false)
       return
     }
     if (!email.trim() || !/\S+@\S+\.\S+/.test(email)) {
-      setErrors({ email: 'Please enter a valid email address' })
+      setErrors({ email: t('dashboard.validEmail') })
       setSubmitting(false)
       return
     }
@@ -99,10 +101,10 @@ export default function ProfileUpdatePage() {
 
       if (data.success && data.data) {
         updateUser(data.data)
-        setSuccessMsg('Profile updated successfully!')
+        setSuccessMsg(t('dashboard.profileUpdated'))
         setAvatarFile(null)
       } else {
-        setErrors({ form: data.message || 'Failed to update profile.' })
+        setErrors({ form: data.message || t('dashboard.profileUpdateFailed') })
       }
     } catch (err: any) {
       const respData = err?.response?.data
@@ -113,7 +115,7 @@ export default function ProfileUpdatePage() {
         })
         setErrors(fieldErrors)
       } else {
-        setErrors({ form: respData?.message || 'Something went wrong. Please try again.' })
+        setErrors({ form: respData?.message || t('common.somethingWentWrong') })
       }
     } finally {
       setSubmitting(false)
@@ -141,7 +143,7 @@ export default function ProfileUpdatePage() {
       </div>
 
       <div className="form-card fade-up d2" style={{ maxWidth: '400px' }}>
-        <div className="form-title" style={{ textAlign: 'center', marginBottom: '1.5rem' }}>Update Profile</div>
+        <div className="form-title" style={{ textAlign: 'center', marginBottom: '1.5rem' }}>{t('dashboard.updateProfile')}</div>
 
         <form onSubmit={handleSubmit} noValidate>
           {/* Avatar selector */}
@@ -230,7 +232,7 @@ export default function ProfileUpdatePage() {
           {/* Full Name */}
           <div className="field">
             <div className="field-header">
-              <label className="field-label" htmlFor="fullName">Full Name</label>
+              <label className="field-label" htmlFor="fullName">{t('dashboard.yourName')}</label>
             </div>
             <div className="input-row">
               <span className="input-icon">
@@ -247,7 +249,7 @@ export default function ProfileUpdatePage() {
                   setFullName(e.target.value)
                   if (errors.fullName) setErrors(prev => ({ ...prev, fullName: '' }))
                 }}
-                placeholder="Your Name"
+                placeholder={t('dashboard.yourName')}
               />
             </div>
             {errors.fullName && (
@@ -260,7 +262,7 @@ export default function ProfileUpdatePage() {
           {/* Email Address */}
           <div className="field">
             <div className="field-header">
-              <label className="field-label" htmlFor="email">Email Address</label>
+              <label className="field-label" htmlFor="email">{t('auth.email')}</label>
             </div>
             <div className="input-row">
               <span className="input-icon">
@@ -277,7 +279,7 @@ export default function ProfileUpdatePage() {
                   setEmail(e.target.value)
                   if (errors.email) setErrors(prev => ({ ...prev, email: '' }))
                 }}
-                placeholder="you@example.com"
+                placeholder={t('auth.emailPlaceholder')}
               />
             </div>
             {errors.email && (
@@ -305,13 +307,13 @@ export default function ProfileUpdatePage() {
             disabled={submitting}
             style={{ opacity: submitting ? 0.7 : 1, marginTop: '1.25rem' }}
           >
-            {submitting ? 'Updating…' : 'Save Changes'}
+            {submitting ? t('common.updating') : t('dashboard.saveChanges')}
           </button>
         </form>
 
         <div style={{ marginTop: '1.5rem', textAlign: 'center' }}>
           <Link href="/dashboard" style={{ fontSize: '0.85rem', color: 'var(--muted)', textDecoration: 'none', fontWeight: '500' }}>
-            ← Back to Dashboard
+            {t('dashboard.backToDashboard')}
           </Link>
         </div>
       </div>

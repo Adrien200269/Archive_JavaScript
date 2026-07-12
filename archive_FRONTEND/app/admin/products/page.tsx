@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { productService, Product } from '@/lib/api/product'
+import { useLanguage } from '@/lib/i18n/context'
 import Modal from '../_components/Modal'
 
 export default function AdminProductsPage() {
@@ -14,13 +15,15 @@ export default function AdminProductsPage() {
   const [submitting, setSubmitting] = useState(false)
   const [toast, setToast] = useState('')
 
+  const { t } = useLanguage()
+
   const loadProducts = async () => {
     try {
       setLoading(true)
       const data = await productService.getProducts()
       setProducts(data)
     } catch (err: any) {
-      setError(err?.message || 'Failed to load products')
+      setError(err?.message || t('common.loadFailed') + ' ' + t('admin.products'))
     } finally {
       setLoading(false)
     }
@@ -42,12 +45,12 @@ export default function AdminProductsPage() {
     setSubmitting(true)
     try {
       await productService.addProduct(formData)
-      showToast('Product added successfully')
+      showToast(t('admin.productAdded'))
       setShowForm(false)
       form.reset()
       loadProducts()
     } catch (err: any) {
-      showToast(err?.response?.data?.message || err?.message || 'Failed to add product')
+      showToast(err?.response?.data?.message || err?.message || t('common.somethingWentWrong'))
     } finally {
       setSubmitting(false)
     }
@@ -61,11 +64,11 @@ export default function AdminProductsPage() {
     setSubmitting(true)
     try {
       await productService.updateProduct(editTarget._id, formData)
-      showToast('Product updated successfully')
+      showToast(t('admin.productUpdated'))
       setEditTarget(null)
       loadProducts()
     } catch (err: any) {
-      showToast(err?.response?.data?.message || err?.message || 'Failed to update product')
+      showToast(err?.response?.data?.message || err?.message || t('common.somethingWentWrong'))
     } finally {
       setSubmitting(false)
     }
@@ -79,9 +82,9 @@ export default function AdminProductsPage() {
     setSubmitting(true)
     try {
       await productService.deleteProduct(targetId)
-      showToast('Product deleted successfully')
+      showToast(t('admin.productDeleted'))
     } catch (err: any) {
-      showToast(err?.response?.data?.message || err?.message || 'Failed to delete product')
+      showToast(err?.response?.data?.message || err?.message || t('common.somethingWentWrong'))
       loadProducts()
     } finally {
       setSubmitting(false)
@@ -92,35 +95,35 @@ export default function AdminProductsPage() {
     <div>
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
-          <p className="admin-page-eyebrow">Admin</p>
-          <h1 className="admin-page-title">Products</h1>
-          <p className="admin-page-subtitle">{products.length} product{products.length !== 1 ? 's' : ''}</p>
+          <p className="admin-page-eyebrow">{t('admin.panel')}</p>
+          <h1 className="admin-page-title">{t('admin.products')}</h1>
+          <p className="admin-page-subtitle">{products.length}</p>
         </div>
         <button onClick={() => setShowForm(!showForm)} className="admin-btn-primary">
-          {showForm ? 'Cancel' : '+ Add Product'}
+          {showForm ? t('common.cancel') : '+ ' + t('admin.addProduct')}
         </button>
       </div>
 
       {showForm && (
         <div className="admin-form-card" style={{ marginBottom: '1.5rem', maxWidth: '100%' }}>
-          <p className="admin-form-section-title">New Product</p>
+          <p className="admin-form-section-title">{t('admin.newProduct')}</p>
           <form onSubmit={handleAdd} encType="multipart/form-data">
             <div className="admin-form-grid">
               <div className="admin-field">
-                <label className="admin-label" htmlFor="name">Name</label>
+                <label className="admin-label" htmlFor="name">{t('admin.name')}</label>
                 <input id="name" name="name" type="text" className="admin-input" required />
               </div>
               <div className="admin-field">
-                <label className="admin-label" htmlFor="price">Price</label>
+                <label className="admin-label" htmlFor="price">{t('admin.price')}</label>
                 <input id="price" name="price" type="number" step="0.01" className="admin-input" required />
               </div>
             </div>
             <div className="admin-field">
-              <label className="admin-label" htmlFor="image">Image</label>
+              <label className="admin-label" htmlFor="image">{t('admin.image')}</label>
               <input id="image" name="image" type="file" className="admin-input" accept="image/*" required style={{ paddingTop: '0.5rem' }} />
             </div>
             <button type="submit" disabled={submitting} className="admin-form-submit">
-              {submitting ? 'Adding…' : 'Add Product'}
+              {submitting ? t('admin.adding') : t('admin.addProductBtn')}
             </button>
           </form>
         </div>
@@ -138,19 +141,19 @@ export default function AdminProductsPage() {
         ) : products.length === 0 ? (
           <div className="admin-state-box">
             <div className="admin-state-box-icon">📦</div>
-            <p className="admin-state-box-title">No products yet</p>
-            <p className="admin-state-box-desc">Add your first product to get started.</p>
+            <p className="admin-state-box-title">{t('admin.noProducts')}</p>
+            <p className="admin-state-box-desc">{t('admin.noProductsDesc')}</p>
           </div>
         ) : (
           <div style={{ overflowX: 'auto' }}>
             <table className="admin-table">
               <thead>
                 <tr>
-                  <th>Product</th>
-                  <th>Price</th>
-                  <th>Favourite</th>
-                  <th>Created</th>
-                  <th>Actions</th>
+                  <th>{t('admin.name')}</th>
+                  <th>{t('admin.price')}</th>
+                  <th>{t('admin.favourite')}</th>
+                  <th>{t('admin.created')}</th>
+                  <th>{t('admin.actions')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -167,7 +170,7 @@ export default function AdminProductsPage() {
                     <td style={{ fontWeight: 600 }}>₹{product.price.toLocaleString()}</td>
                     <td>
                       <span className={`admin-badge ${product.isFavourite ? 'admin-badge--admin' : 'admin-badge--user'}`}>
-                        {product.isFavourite ? 'Yes' : 'No'}
+                        {product.isFavourite ? t('admin.yes') : t('admin.no')}
                       </span>
                     </td>
                     <td style={{ color: '#888', fontSize: '0.82rem' }}>
@@ -181,13 +184,13 @@ export default function AdminProductsPage() {
                           onClick={() => setEditTarget(product)}
                           className="admin-table-action-link"
                         >
-                          Edit
+                          {t('common.edit')}
                         </button>
                         <button
                           onClick={() => setDeleteTarget(product)}
                           className="admin-table-action-link admin-table-action-link--danger"
                         >
-                          Delete
+                          {t('common.delete')}
                         </button>
                       </div>
                     </td>
@@ -203,11 +206,11 @@ export default function AdminProductsPage() {
       <Modal
         open={!!editTarget}
         onClose={() => setEditTarget(null)}
-        title="Edit Product"
+        title={t('admin.editProduct')}
       >
         <form onSubmit={handleEdit} encType="multipart/form-data">
           <div className="admin-field">
-            <label className="admin-label" htmlFor="edit-name">Name</label>
+            <label className="admin-label" htmlFor="edit-name">{t('admin.name')}</label>
             <input
               id="edit-name"
               name="name"
@@ -218,7 +221,7 @@ export default function AdminProductsPage() {
             />
           </div>
           <div className="admin-field">
-            <label className="admin-label" htmlFor="edit-price">Price</label>
+            <label className="admin-label" htmlFor="edit-price">{t('admin.price')}</label>
             <input
               id="edit-price"
               name="price"
@@ -230,15 +233,15 @@ export default function AdminProductsPage() {
             />
           </div>
           <div className="admin-field">
-            <label className="admin-label" htmlFor="edit-image">Image (leave empty to keep current)</label>
+            <label className="admin-label" htmlFor="edit-image">{t('admin.imageKeep')}</label>
             <input id="edit-image" name="image" type="file" className="admin-input" accept="image/*" style={{ paddingTop: '0.5rem' }} />
           </div>
           <div className="admin-modal-actions">
             <button type="button" onClick={() => setEditTarget(null)} className="admin-btn-secondary">
-              Cancel
+              {t('common.cancel')}
             </button>
             <button type="submit" disabled={submitting} className="admin-btn-primary">
-              {submitting ? 'Saving…' : 'Save'}
+              {submitting ? t('common.saving') : t('common.save')}
             </button>
           </div>
         </form>
@@ -248,17 +251,17 @@ export default function AdminProductsPage() {
       <Modal
         open={!!deleteTarget}
         onClose={() => setDeleteTarget(null)}
-        title="Delete Product"
+        title={t('admin.deleteProduct')}
       >
         <p className="admin-modal-message">
-          Are you sure you want to delete <strong>{deleteTarget?.name}</strong>? This action cannot be undone.
+          {t('admin.confirmDeleteProduct', { name: deleteTarget?.name || '' })}
         </p>
         <div className="admin-modal-actions">
           <button onClick={() => setDeleteTarget(null)} className="admin-btn-secondary">
-            Cancel
+            {t('common.cancel')}
           </button>
           <button onClick={handleDelete} disabled={submitting} className="admin-btn-danger">
-            {submitting ? 'Deleting…' : 'Delete Product'}
+            {submitting ? t('admin.deleting') : t('admin.deleteProduct')}
           </button>
         </div>
       </Modal>

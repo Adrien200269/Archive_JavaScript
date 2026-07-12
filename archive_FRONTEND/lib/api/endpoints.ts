@@ -20,6 +20,7 @@ export const ENDPOINTS = {
       getAll: '/admin/orders',
       updateStatus: (id: string) => `/admin/orders/${id}/status`,
     },
+    analytics: '/admin/analytics',
   },
   products: {
     getAll: '/products',

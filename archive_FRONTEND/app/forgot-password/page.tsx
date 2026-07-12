@@ -2,6 +2,7 @@
 
 import { useState, FormEvent } from 'react'
 import Link from 'next/link'
+import { useLanguage } from '../../lib/i18n/context'
 import api from '../../lib/api/axios'
 import { ENDPOINTS } from '../../lib/api/endpoints'
 
@@ -10,6 +11,7 @@ export default function ForgotPasswordPage() {
   const [sent, setSent] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const { t } = useLanguage()
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
@@ -20,7 +22,7 @@ export default function ForgotPasswordPage() {
       await api.post(ENDPOINTS.auth.forgotPassword, { email })
       setSent(true)
     } catch (err: any) {
-      setError(err?.response?.data?.message || 'Something went wrong. Please try again.')
+      setError(err?.response?.data?.message || t('common.somethingWentWrong'))
     } finally {
       setLoading(false)
     }
@@ -40,34 +42,34 @@ export default function ForgotPasswordPage() {
       <div className="form-card fade-up d2">
         {sent ? (
           <>
-            <div className="form-title" style={{ textAlign: 'center' }}>Check Your Email</div>
+            <div className="form-title" style={{ textAlign: 'center' }}>{t('auth.checkEmail')}</div>
             <p style={{ color: 'var(--muted)', fontSize: '0.9rem', textAlign: 'center', lineHeight: 1.6, marginBottom: '1.5rem' }}>
-              If an account exists for <strong>{email}</strong>, a 6-digit reset code has been sent.
+              {t('auth.resetSent', { email })}
             </p>
             <Link
               href={`/reset-password?email=${encodeURIComponent(email)}`}
               className="btn-login"
               style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}
             >
-              Enter Reset Code
+              {t('auth.resetCode')}
             </Link>
             <div style={{ marginTop: '1rem', textAlign: 'center' }}>
               <Link href="/forgot-password" style={{ fontSize: '0.85rem', color: 'var(--muted)', textDecoration: 'none', fontWeight: 500 }}>
-                Try a different email
+                {t('auth.tryDifferentEmail')}
               </Link>
             </div>
           </>
         ) : (
           <>
-            <div className="form-title" style={{ textAlign: 'center' }}>Forgot Password</div>
+            <div className="form-title" style={{ textAlign: 'center' }}>{t('auth.forgotTitle')}</div>
             <p style={{ color: 'var(--muted)', fontSize: '0.85rem', textAlign: 'center', marginBottom: '1.5rem', lineHeight: 1.5 }}>
-              Enter your email address and we&apos;ll send you a code to reset your password.
+              {t('auth.forgotDesc')}
             </p>
 
             <form onSubmit={handleSubmit} noValidate>
               <div className="field">
                 <div className="field-header">
-                  <label className="field-label" htmlFor="email">Email Address</label>
+                  <label className="field-label" htmlFor="email">{t('auth.email')}</label>
                 </div>
                 <div className="input-row">
                   <span className="input-icon">
@@ -81,7 +83,7 @@ export default function ForgotPasswordPage() {
                     type="email"
                     value={email}
                     onChange={(e) => { setEmail(e.target.value); setError('') }}
-                    placeholder="you@example.com"
+                    placeholder={t('auth.emailPlaceholder')}
                     required
                   />
                 </div>
@@ -94,7 +96,7 @@ export default function ForgotPasswordPage() {
               )}
 
               <button type="submit" className="btn-login" disabled={loading} style={{ opacity: loading ? 0.7 : 1 }}>
-                {loading ? 'Sending…' : 'Send Reset Code'}
+                {loading ? t('auth.sending') : t('auth.sendCode')}
               </button>
             </form>
           </>
@@ -102,7 +104,7 @@ export default function ForgotPasswordPage() {
 
         <div style={{ marginTop: '1.25rem', textAlign: 'center' }}>
           <Link href="/login" style={{ fontSize: '0.85rem', color: 'var(--muted)', textDecoration: 'none', fontWeight: 500 }}>
-            ← Back to Login
+            {t('auth.backToLogin')}
           </Link>
         </div>
       </div>

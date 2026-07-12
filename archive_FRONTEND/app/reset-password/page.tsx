@@ -3,6 +3,7 @@
 import { Suspense, useState, FormEvent } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import { useLanguage } from '../../lib/i18n/context'
 import api from '../../lib/api/axios'
 import { ENDPOINTS } from '../../lib/api/endpoints'
 
@@ -22,13 +23,14 @@ function ResetPasswordForm() {
   const [showPw, setShowPw] = useState(false)
   const [errors, setErrors] = useState<FormErrors>({})
   const [loading, setLoading] = useState(false)
+  const { t } = useLanguage()
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
     setErrors({})
 
     if (!email) {
-      setErrors({ form: 'Missing email. Please go back and try again.' })
+      setErrors({ form: t('auth.missingEmailDesc') })
       return
     }
     if (code.length !== 6 || !/^\d{6}$/.test(code)) {
@@ -36,7 +38,7 @@ function ResetPasswordForm() {
       return
     }
     if (password.length < 8) {
-      setErrors({ password: 'Password must be at least 8 characters' })
+      setErrors({ password: t('dashboard.passwordLength') })
       return
     }
 
@@ -53,7 +55,7 @@ function ResetPasswordForm() {
         })
         setErrors(fieldErrors)
       } else {
-        setErrors({ form: data?.message || 'Invalid or expired code. Please try again.' })
+        setErrors({ form: data?.message || t('common.somethingWentWrong') })
       }
     } finally {
       setLoading(false)
@@ -68,12 +70,12 @@ function ResetPasswordForm() {
           <div className="blob blob-br" />
         </div>
         <div className="form-card fade-up d2" style={{ textAlign: 'center' }}>
-          <div className="form-title">Missing Email</div>
+          <div className="form-title">{t('auth.missingEmail')}</div>
           <p style={{ color: 'var(--muted)', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
-            No email was provided. Please request a new reset code.
+            {t('auth.missingEmailDesc')}
           </p>
           <Link href="/forgot-password" className="btn-login" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}>
-            Request Reset Code
+            {t('auth.requestReset')}
           </Link>
         </div>
       </main>
@@ -92,15 +94,15 @@ function ResetPasswordForm() {
       </div>
 
       <div className="form-card fade-up d2">
-        <div className="form-title" style={{ textAlign: 'center' }}>Reset Password</div>
+        <div className="form-title" style={{ textAlign: 'center' }}>{t('auth.resetTitle')}</div>
         <p style={{ color: 'var(--muted)', fontSize: '0.85rem', textAlign: 'center', marginBottom: '1.5rem', lineHeight: 1.5 }}>
-          Enter the 6-digit code sent to <strong>{email}</strong> and your new password.
+          {t('auth.resetDesc', { email })}
         </p>
 
         <form onSubmit={handleSubmit} noValidate>
           <div className="field">
             <div className="field-header">
-              <label className="field-label" htmlFor="code">Reset Code</label>
+              <label className="field-label" htmlFor="code">{t('auth.resetCodeLabel')}</label>
             </div>
             <div className="input-row">
               <span className="input-icon">
@@ -116,7 +118,7 @@ function ResetPasswordForm() {
                 maxLength={6}
                 value={code}
                 onChange={(e) => { setCode(e.target.value.replace(/\D/g, '').slice(0, 6)); setErrors({}) }}
-                placeholder="000000"
+                placeholder={t('auth.resetCodePlaceholder')}
                 style={{ letterSpacing: '0.3em', fontWeight: 600 }}
               />
             </div>
@@ -127,7 +129,7 @@ function ResetPasswordForm() {
 
           <div className="field">
             <div className="field-header">
-              <label className="field-label" htmlFor="password">New Password</label>
+              <label className="field-label" htmlFor="password">{t('auth.newPassword')}</label>
             </div>
             <div className="input-row">
               <span className="input-icon">
@@ -141,7 +143,7 @@ function ResetPasswordForm() {
                 type={showPw ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => { setPassword(e.target.value); setErrors({}) }}
-                placeholder="Min. 8 characters"
+                placeholder={t('auth.newPasswordPlaceholder')}
               />
               <button
                 type="button"
@@ -175,13 +177,13 @@ function ResetPasswordForm() {
           )}
 
           <button type="submit" className="btn-login" disabled={loading} style={{ opacity: loading ? 0.7 : 1 }}>
-            {loading ? 'Resetting…' : 'Reset Password'}
+            {loading ? t('auth.resetting') : t('auth.resetPassword')}
           </button>
         </form>
 
         <div style={{ marginTop: '1.25rem', textAlign: 'center' }}>
           <Link href="/login" style={{ fontSize: '0.85rem', color: 'var(--muted)', textDecoration: 'none', fontWeight: 500 }}>
-            ← Back to Login
+            {t('auth.backToLogin')}
           </Link>
         </div>
       </div>
@@ -190,6 +192,7 @@ function ResetPasswordForm() {
 }
 
 export default function ResetPasswordPage() {
+  const { t } = useLanguage()
   return (
     <Suspense fallback={
       <main className="page" style={{ justifyContent: 'center' }}>
@@ -197,7 +200,7 @@ export default function ResetPasswordPage() {
           <div className="blob blob-tl" />
           <div className="blob blob-br" />
         </div>
-        <p style={{ color: 'var(--muted)', fontSize: '0.9rem' }}>Loading…</p>
+        <p style={{ color: 'var(--muted)', fontSize: '0.9rem' }}>{t('common.loading')}</p>
       </main>
     }>
       <ResetPasswordForm />
