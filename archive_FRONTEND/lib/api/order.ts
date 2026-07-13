@@ -22,18 +22,28 @@ export interface Order {
   totalPrice: number
   status: 'Pending' | 'Shipped' | 'Delivered' | 'Cancelled'
   delivery: Delivery
+  paymentMethod: 'cod' | 'khalti'
+  paymentStatus: 'pending' | 'paid' | 'failed'
   createdAt: string
   updatedAt: string
 }
 
 export const orderService = {
-  async createOrder(items: { productId: string; quantity: number }[], delivery: Delivery): Promise<Order> {
-    const { data } = await api.post(ENDPOINTS.orders.create, { items, delivery })
+  async createOrder(
+    items: { productId: string; quantity: number }[],
+    delivery: Delivery,
+    paymentMethod?: 'cod' | 'khalti'
+  ): Promise<Order> {
+    const { data } = await api.post(ENDPOINTS.orders.create, {
+      items,
+      delivery,
+      paymentMethod: paymentMethod || 'cod',
+    })
     return data.data
   },
 
   async getMyOrders(): Promise<Order[]> {
     const { data } = await api.get(ENDPOINTS.orders.getMy)
     return data.data
-  }
+  },
 }

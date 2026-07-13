@@ -9,7 +9,7 @@ export interface IUser extends Document {
   avatar?: string;
   age?: number;
   role: "user" | "admin";
-  provider: "local" | "google" | "facebook";
+  provider: "local" | "google";
   providerId?: string;
   resetPasswordCode?: string;
   resetPasswordExpires?: Date;
@@ -51,7 +51,7 @@ const userSchema = new Schema<IUser>(
     },
     provider: {
       type: String,
-      enum: ["local", "google", "facebook"],
+      enum: ["local", "google"],
       default: "local",
     },
     providerId: {

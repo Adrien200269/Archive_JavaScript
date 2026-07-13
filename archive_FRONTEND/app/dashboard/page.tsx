@@ -10,6 +10,7 @@ import { LANGUAGES } from '../../lib/i18n/translations'
 import { productService, Product } from '../../lib/api/product'
 import { recommendationService } from '../../lib/api/recommendation'
 import { orderService, Order } from '../../lib/api/order'
+import { paymentService } from '../../lib/api/payment'
 
 interface CartItem {
   product: Product
@@ -47,6 +48,9 @@ export default function DashboardPage() {
   const [deliveryAddress, setDeliveryAddress] = useState('')
   const [deliveryPhone, setDeliveryPhone] = useState('')
 
+  // Payment state
+  const [paymentMethod, setPaymentMethod] = useState<'cod' | 'khalti'>('cod')
+
   // Orders state
   const [orders, setOrders] = useState<Order[]>([])
   const [loadingOrders, setLoadingOrders] = useState(false)
@@ -54,6 +58,22 @@ export default function DashboardPage() {
 
   const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0)
   const cartTotal = cartItems.reduce((sum, item) => sum + item.product.price * item.quantity, 0)
+
+  // Handle Khalti payment callback
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const paymentStatus = params.get('payment')
+    if (paymentStatus === 'success') {
+      setCheckoutMessage(t('dashboard.orderPlaced'))
+      setTimeout(() => setCheckoutMessage(''), 4000)
+      window.history.replaceState({}, '', '/dashboard')
+      setActiveTab('orders')
+    } else if (paymentStatus === 'failed') {
+      setCheckoutMessage(t('dashboard.checkoutFailed'))
+      setTimeout(() => setCheckoutMessage(''), 4000)
+      window.history.replaceState({}, '', '/dashboard')
+    }
+  }, [])
 
   // Fetch products and AI recommendations
   useEffect(() => {
@@ -149,6 +169,13 @@ export default function DashboardPage() {
     )
   }
 
+  const clearCartAndNotify = () => {
+    setCartItems([])
+    setCartOpen(false)
+    setCheckoutMessage(t('dashboard.orderPlaced'))
+    setTimeout(() => setCheckoutMessage(''), 3000)
+  }
+
   const handleCheckout = async () => {
     if (cartItems.length === 0) return
     if (!deliveryName.trim() || !deliveryAddress.trim() || !deliveryPhone.trim()) {
@@ -163,20 +190,30 @@ export default function DashboardPage() {
         productId: item.product._id,
         quantity: item.quantity,
       }))
+      if (paymentMethod === 'khalti') {
+        const { paymentUrl } = await paymentService.initiateKhaltiPayment(items, {
+          name: deliveryName.trim(),
+          address: deliveryAddress.trim(),
+          phone: deliveryPhone.trim(),
+        })
+        setCartOpen(false)
+        setCheckoutLoading(false)
+        window.location.href = paymentUrl
+        return
+      }
       await orderService.createOrder(items, {
         name: deliveryName.trim(),
         address: deliveryAddress.trim(),
         phone: deliveryPhone.trim(),
-      })
-      setCartItems([])
-      setCartOpen(false)
-      setCheckoutMessage(t('dashboard.orderPlaced'))
-      setTimeout(() => setCheckoutMessage(''), 3000)
+      }, 'cod')
+      clearCartAndNotify()
     } catch (err: any) {
       setCheckoutMessage(err?.response?.data?.message || err?.message || t('dashboard.checkoutFailed'))
       setTimeout(() => setCheckoutMessage(''), 3000)
     } finally {
-      setCheckoutLoading(false)
+      if (paymentMethod !== 'khalti') {
+        setCheckoutLoading(false)
+      }
     }
   }
 
@@ -1322,6 +1359,45 @@ export default function DashboardPage() {
                     style={{ height: '56px', fontSize: '0.82rem', paddingTop: '0.5rem', resize: 'none' }}
                     required
                   />
+                </div>
+                <p style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--muted)', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  Payment Method
+                </p>
+                <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.8rem' }}>
+                  <button
+                    type="button"
+                    onClick={() => setPaymentMethod('cod')}
+                    style={{
+                      flex: 1,
+                      padding: '0.5rem',
+                      borderRadius: '8px',
+                      border: paymentMethod === 'cod' ? '2px solid var(--blue)' : '1px solid var(--border)',
+                      background: paymentMethod === 'cod' ? 'var(--blue-bg)' : 'var(--card-bg)',
+                      color: 'var(--black)',
+                      fontWeight: paymentMethod === 'cod' ? 700 : 500,
+                      fontSize: '0.8rem',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Cash on Delivery
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPaymentMethod('khalti')}
+                    style={{
+                      flex: 1,
+                      padding: '0.5rem',
+                      borderRadius: '8px',
+                      border: paymentMethod === 'khalti' ? '2px solid var(--blue)' : '1px solid var(--border)',
+                      background: paymentMethod === 'khalti' ? 'var(--blue-bg)' : 'var(--card-bg)',
+                      color: 'var(--black)',
+                      fontWeight: paymentMethod === 'khalti' ? 700 : 500,
+                      fontSize: '0.8rem',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Khalti
+                  </button>
                 </div>
                 <div style={{
                   display: 'flex',

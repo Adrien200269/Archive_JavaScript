@@ -36,4 +36,9 @@ export const ENDPOINTS = {
   recommendations: {
     get: '/recommendations',
   },
+  payments: {
+    create: '/payments/create',
+    verify: '/payments/verify',
+    callback: '/payments/khalti/callback',
+  },
 }

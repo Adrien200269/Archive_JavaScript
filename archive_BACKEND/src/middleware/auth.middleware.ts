@@ -30,6 +30,7 @@ export const authenticate = (
     ) as JwtPayload;
     (req as any).userId = decoded.id;
     (req as any).userRole = decoded.role;
+    (req as any).userEmail = decoded.email;
     next();
   } catch {
     return res

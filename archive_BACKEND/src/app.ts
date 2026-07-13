@@ -10,6 +10,7 @@ import orderRoutes from "./routes/order.route";
 import adminOrderRoutes from "./routes/admin/order.route";
 import adminAnalyticsRoutes from "./routes/admin/analytics.route";
 import recommendationRoutes from "./routes/recommendation.route";
+import paymentRoutes from "./routes/payment.route";
 import { errorHandler } from "./middleware/error.middleware";
 
 const app = express();
@@ -37,6 +38,7 @@ app.use("/api/v1/admin/analytics", adminAnalyticsRoutes);
 app.use("/api/v1/products", productRoutes);
 app.use("/api/v1/orders", orderRoutes);
 app.use("/api/v1/recommendations", recommendationRoutes);
+app.use("/api/v1/payments", paymentRoutes);
 
 
 // Error handler must be last

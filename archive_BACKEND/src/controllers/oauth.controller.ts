@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import passport from "../config/passport";
-import { User } from "../models/user.model";
 
 const cookieOptions = {
   httpOnly: true,
@@ -38,27 +37,4 @@ export const oauthController = {
     },
   ],
 
-  // GET /api/v1/auth/facebook
-  facebookAuth: passport.authenticate("facebook", {
-    scope: ["email"],
-    session: false,
-  }),
-
-  // GET /api/v1/auth/facebook/callback
-  facebookCallback: [
-    passport.authenticate("facebook", {
-      session: false,
-      failureRedirect: `${clientURL}/login?oauth=failed`,
-    }),
-    async (req: Request, res: Response) => {
-      const user = req.user as any;
-      const token = jwt.sign(
-        { id: user._id.toString(), email: user.email, role: user.role },
-        process.env.JWT_SECRET as string,
-        { expiresIn: process.env.JWT_EXPIRES_IN || "7d" } as jwt.SignOptions
-      );
-      res.cookie("token", token, cookieOptions);
-      res.redirect(`${clientURL}/dashboard`);
-    },
-  ],
 };

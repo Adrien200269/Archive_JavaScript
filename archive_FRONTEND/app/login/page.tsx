@@ -4,7 +4,6 @@ import { useState, FormEvent, ChangeEvent, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import GoogleIcon from '../components/GoogleIcon'
-import FacebookIcon from '../components/FacebookIcon'
 import { LoginSchema } from '../../lib/types/auth'
 import { loginAction } from '../../lib/actions/auth-action'
 import { useLanguage } from '../../lib/i18n/context'
@@ -204,9 +203,7 @@ export default function LoginPage() {
           <a href="/api/v1/auth/google" className="btn-social btn-google" style={{ textDecoration: 'none' }}>
             <GoogleIcon /> Google
           </a>
-          <a href="/api/v1/auth/facebook" className="btn-social btn-facebook" style={{ textDecoration: 'none' }}>
-            <FacebookIcon /> Facebook
-          </a>
+
         </div>
       </div>
 

@@ -18,7 +18,5 @@ router.put("/update", authenticate, upload.single("avatar"), asyncHandler(authCo
 // OAuth routes
 router.get("/google", oauthController.googleAuth);
 router.get("/google/callback", oauthController.googleCallback);
-router.get("/facebook", oauthController.facebookAuth);
-router.get("/facebook/callback", oauthController.facebookCallback);
 
 export default router;

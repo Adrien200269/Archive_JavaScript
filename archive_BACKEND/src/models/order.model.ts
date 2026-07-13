@@ -20,6 +20,9 @@ export interface IOrder extends Document {
   totalPrice: number;
   status: "Pending" | "Shipped" | "Delivered" | "Cancelled";
   delivery: IDelivery;
+  paymentMethod: "cod" | "khalti";
+  paymentStatus: "pending" | "paid" | "failed";
+  stripePaymentIntentId?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -74,6 +77,19 @@ const orderSchema = new Schema<IOrder>(
       name: { type: String, required: [true, "Delivery name is required"] },
       address: { type: String, required: [true, "Delivery address is required"] },
       phone: { type: String, required: [true, "Delivery phone is required"] },
+    },
+    paymentMethod: {
+      type: String,
+      enum: ["cod", "khalti"],
+      default: "cod",
+    },
+    paymentStatus: {
+      type: String,
+      enum: ["pending", "paid", "failed"],
+      default: "pending",
+    },
+    stripePaymentIntentId: {
+      type: String,
     },
   },
   { timestamps: true }

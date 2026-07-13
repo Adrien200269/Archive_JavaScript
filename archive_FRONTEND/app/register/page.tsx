@@ -4,7 +4,6 @@ import { useState, FormEvent, ChangeEvent, ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import GoogleIcon from '../components/GoogleIcon'
-import FacebookIcon from '../components/FacebookIcon'
 import { RegisterSchema } from '../../lib/types/auth'
 import { registerAction } from '../../lib/actions/auth-action'
 import { useLanguage } from '../../lib/i18n/context'
@@ -237,9 +236,7 @@ export default function RegisterPage() {
           <a href="/api/v1/auth/google" className="btn-social btn-google" style={{ textDecoration: 'none' }}>
             <GoogleIcon /> Google
           </a>
-          <a href="/api/v1/auth/facebook" className="btn-social btn-facebook" style={{ textDecoration: 'none' }}>
-            <FacebookIcon /> Facebook
-          </a>
+
         </div>
       </div>
 
