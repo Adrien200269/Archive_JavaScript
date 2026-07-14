@@ -3,6 +3,7 @@
 import { useState, FormEvent } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import LoadingSpinner from '../../components/LoadingSpinner'
 import { useAuth } from '../../context/AuthContext'
 import { useLanguage } from '@/lib/i18n/context'
 import api from '../../../lib/api/axios'
@@ -38,7 +39,7 @@ export default function PasswordUpdatePage() {
           <div className="blob blob-tl" />
           <div className="blob blob-br" />
         </div>
-        <p style={{ color: 'var(--muted)', fontSize: '0.9rem' }}>{t('dashboard.loadingSession')}</p>
+        <LoadingSpinner text={t('dashboard.loadingSession')} />
       </main>
     )
   }
@@ -116,6 +117,28 @@ export default function PasswordUpdatePage() {
         <div className="blob blob-tl" />
         <div className="blob blob-br" />
       </div>
+
+      {submitting && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          zIndex: 9999,
+          backgroundColor: 'rgba(0,0,0,0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          backdropFilter: 'blur(4px)',
+        }}>
+          <div style={{
+            background: 'var(--card-bg)',
+            borderRadius: '20px',
+            padding: '2.5rem',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+          }}>
+            <LoadingSpinner text="Updating..." />
+          </div>
+        </div>
+      )}
 
       <div className="logo fade-up d1">
         archive<br />outfitters
@@ -273,15 +296,36 @@ export default function PasswordUpdatePage() {
           </div>
 
           {errors.form && (
-            <p style={{ color: 'var(--error)', fontSize: '0.8rem', margin: '0.75rem 0', textAlign: 'center' }}>
+            <div style={{
+              backgroundColor: 'var(--error-bg)',
+              border: '1px solid var(--error)',
+              color: 'var(--error)',
+              fontSize: '0.8rem',
+              padding: '0.65rem 1rem',
+              borderRadius: '8px',
+              margin: '0.75rem 0',
+              textAlign: 'center',
+              fontWeight: 500,
+            }}>
               {errors.form}
-            </p>
+            </div>
           )}
 
           {successMsg && (
-            <p style={{ color: 'var(--success)', fontSize: '0.8rem', margin: '0.75rem 0', textAlign: 'center', fontWeight: '500' }}>
+            <div style={{
+              backgroundColor: 'var(--success-bg)',
+              border: '1px solid var(--success)',
+              color: 'var(--success)',
+              fontSize: '0.8rem',
+              padding: '0.65rem 1rem',
+              borderRadius: '8px',
+              margin: '0.75rem 0',
+              textAlign: 'center',
+              fontWeight: 500,
+              animation: 'toastIn 0.3s ease',
+            }}>
               {successMsg}
-            </p>
+            </div>
           )}
 
           <button
@@ -295,7 +339,22 @@ export default function PasswordUpdatePage() {
         </form>
 
         <div style={{ marginTop: '1.5rem', textAlign: 'center' }}>
-          <Link href="/dashboard" style={{ fontSize: '0.85rem', color: 'var(--muted)', textDecoration: 'none', fontWeight: '500' }}>
+          <Link href="/dashboard" style={{
+            fontSize: '0.85rem',
+            color: 'var(--muted)',
+            textDecoration: 'none',
+            fontWeight: '500',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.4rem',
+            transition: 'color 0.15s',
+          }}
+            onMouseEnter={e => e.currentTarget.style.color = 'var(--black)'}
+            onMouseLeave={e => e.currentTarget.style.color = 'var(--muted)'}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="15 18 9 12 15 6"/>
+            </svg>
             {t('dashboard.backToDashboard')}
           </Link>
         </div>

@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import Avatar from '@/app/components/Avatar'
 import Modal from '../../_components/Modal'
 import { handleDeleteUser } from '@/lib/actions/admin/user-action'
 
@@ -89,13 +90,6 @@ export default function UserTable({ data, pagination, search }: UserTableProps) 
     return pages
   }
 
-  const initials = (name: string) =>
-    name
-      .split(' ')
-      .map((n) => n[0])
-      .join('')
-      .slice(0, 2)
-      .toUpperCase()
 
   return (
     <div>
@@ -171,13 +165,11 @@ export default function UserTable({ data, pagination, search }: UserTableProps) 
                   <tr key={user.id}>
                     <td>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-                        <div className="admin-avatar-circle" style={{ width: '36px', height: '36px', fontSize: '0.85rem' }}>
-                          {user.avatar ? (
-                            <img src={user.avatar} alt={user.fullName} />
-                          ) : (
-                            initials(user.fullName)
-                          )}
-                        </div>
+                        <Avatar
+                          src={user.avatar}
+                          name={user.fullName}
+                          size={36}
+                        />
                         <span style={{ fontWeight: 600, color: 'var(--black)' }}>{user.fullName}</span>
                       </div>
                     </td>

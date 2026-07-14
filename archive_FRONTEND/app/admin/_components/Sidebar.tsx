@@ -9,6 +9,7 @@ import { useLanguage } from '@/lib/i18n/context'
 import { LANGUAGES } from '@/lib/i18n/translations'
 import { logoutAction } from '@/lib/actions/auth-action'
 import api from '@/lib/api/axios'
+import Avatar from '@/app/components/Avatar'
 import Modal from './Modal'
 
 const NAV = (t: (p: string) => string) => [
@@ -124,10 +125,6 @@ export default function Sidebar() {
       setSubmitting(false)
     }
   }
-
-  const initials = user?.fullName
-    ? user.fullName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
-    : 'A'
 
   return (
     <>
@@ -269,13 +266,11 @@ export default function Sidebar() {
               backgroundColor: 'var(--input-bg)',
             }}
           >
-            <div className="admin-avatar-circle" style={{ width: '34px', height: '34px', fontSize: '0.8rem', flexShrink: 0 }}>
-              {user?.avatar ? (
-                <img src={user.avatar} alt="" />
-              ) : (
-                initials
-              )}
-            </div>
+            <Avatar
+              src={user?.avatar}
+              name={user?.fullName || 'A'}
+              size={34}
+            />
             <div style={{ minWidth: 0 }}>
               <p style={{ fontWeight: 600, fontSize: '0.82rem', color: 'var(--black)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 {user?.fullName || t('admin.adminBadge')}
@@ -324,7 +319,7 @@ export default function Sidebar() {
               {avatarPreview ? (
                 <img src={avatarPreview} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               ) : (
-                <span style={{ fontSize: '1.5rem', fontWeight: 600, color: 'var(--black)' }}>{initials}</span>
+                <Avatar src={user?.avatar} name={user?.fullName || 'A'} size={80} />
               )}
             </div>
             <button type="button" onClick={() => fileInputRef.current?.click()} style={{ background: 'none', border: 'none', color: 'var(--muted)', fontSize: '0.75rem', cursor: 'pointer', marginTop: '0.4rem' }}>

@@ -30,20 +30,20 @@
 [data-theme="dark"] {
   --white: #0f0f0f;
   --black: #e8e8e8;
-  --card-bg: #1a1a1a;
-  --card-bg-alt: #1e1e1e;
+  --card-bg: #1c1c1e;
+  --card-bg-alt: #222225;
   --blob: #2a2a2a;
-  --input-bg: #242424;
-  --border: #333333;
+  --input-bg: #2c2c2e;
+  --border: #3a3a3c;
   --border-light: #2a2a2a;
-  --muted: #888888;
-  --muted-light: #666666;
+  --muted: #a0a0a0;
+  --muted-light: #7c7c7c;
   --blue: #6b6bf0;
   --blue-hover: #7b7bf5;
-  --card-shadow: 0 2px 32px rgba(0, 0, 0, 0.4), 0 0 0 0.5px rgba(255,255,255,0.04);
+  --card-shadow: 0 2px 32px rgba(0, 0, 0, 0.5), 0 0 0 0.5px rgba(255,255,255,0.06);
   --error: #e74c3c;
   --error-bg: #2d1b1b;
-   --success: #2ecc71;
+  --success: #2ecc71;
   --success-bg: #1a2e1e;
   --btn-bg: #ffffff;
   --btn-text: #0f0f0f;
@@ -367,6 +367,11 @@ html, body {
   .form-card { padding: 1.5rem 1.25rem; }
   .blob-tl { width: 220px; height: 190px; }
   .blob-br { width: 220px; height: 190px; }
+}
+
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 /* ═══════════════════════════════════════════════════════

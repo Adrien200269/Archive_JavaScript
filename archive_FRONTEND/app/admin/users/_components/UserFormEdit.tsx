@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { editUserSchema, type EditUserFormData } from './schema'
+import Avatar from '@/app/components/Avatar'
 import { handleUpdateUser } from '@/lib/actions/admin/user-action'
 
 interface UserData {
@@ -76,24 +77,15 @@ export default function UserFormEdit({ user }: { user: UserData }) {
     })
   }
 
-  const initials = user.fullName
-    .split(' ')
-    .map((n) => n[0])
-    .join('')
-    .slice(0, 2)
-    .toUpperCase()
-
   return (
     <div className="admin-form-card">
       {/* Avatar preview */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
-        <div className="admin-avatar-circle">
-          {user.avatar ? (
-            <img src={user.avatar} alt={user.fullName} />
-          ) : (
-            initials
-          )}
-        </div>
+        <Avatar
+          src={user.avatar}
+          name={user.fullName}
+          size={60}
+        />
         <div>
           <p style={{ fontWeight: 700, color: 'var(--black)' }}>{user.fullName}</p>
           <p style={{ fontSize: '0.82rem', color: '#888' }}>{user.email}</p>

@@ -4,6 +4,7 @@ import { useState, FormEvent, ChangeEvent, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import GoogleIcon from '../components/GoogleIcon'
+import LoadingSpinner from '../components/LoadingSpinner'
 import { LoginSchema } from '../../lib/types/auth'
 import { loginAction } from '../../lib/actions/auth-action'
 import { useLanguage } from '../../lib/i18n/context'
@@ -72,6 +73,29 @@ export default function LoginPage() {
 
   return (
     <main className="page">
+      {/* Loading overlay */}
+      {loading && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          zIndex: 9999,
+          backgroundColor: 'rgba(0,0,0,0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          backdropFilter: 'blur(4px)',
+        }}>
+          <div style={{
+            background: 'var(--card-bg)',
+            borderRadius: '20px',
+            padding: '2.5rem',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+          }}>
+            <LoadingSpinner text="Signing in..." />
+          </div>
+        </div>
+      )}
+
       {/* Background blobs */}
       <div className="blob-container">
         <div className="blob blob-tl" />

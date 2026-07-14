@@ -3,6 +3,8 @@
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import LoadingSpinner from '../components/LoadingSpinner'
+import Avatar from '../components/Avatar'
 import { useAuth } from '../context/AuthContext'
 import { useTheme } from '../context/ThemeContext'
 import { useLanguage } from '../../lib/i18n/context'
@@ -224,22 +226,12 @@ export default function DashboardPage() {
           <div className="blob blob-tl" />
           <div className="blob blob-br" />
         </div>
-        <p style={{ color: 'var(--muted)', fontSize: '0.9rem' }}>{t('dashboard.loadingSession')}</p>
+        <LoadingSpinner text={t('dashboard.loadingSession')} />
       </main>
     )
   }
 
   if (!user) return null
-
-  // Generate initials for avatar fallback
-  const initials = user.fullName
-    ? user.fullName
-        .split(' ')
-        .map((n) => n[0])
-        .join('')
-        .slice(0, 2)
-        .toUpperCase()
-    : 'U'
 
   // Filter products by search query and favorite status
   const filteredProducts = products.filter((product) => {
@@ -795,32 +787,118 @@ export default function DashboardPage() {
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            justifyContent: 'center',
+            maxWidth: '500px',
+            margin: '0 auto',
+            width: '100%',
           }}>
-            <h1 className="logo" style={{
-              fontFamily: "'Cormorant Garamond', serif",
-              fontWeight: 700,
-              fontSize: '2.5rem',
+            {/* Profile Header Card */}
+            <div style={{
+              width: '100%',
+              background: 'var(--card-bg)',
+              borderRadius: '20px',
+              border: '1px solid var(--border)',
+              padding: '2rem 1.5rem 1.5rem',
               textAlign: 'center',
-              marginBottom: '1.5rem',
-              color: 'var(--black)',
-              letterSpacing: '-0.02em'
+              marginBottom: '1rem',
+              boxShadow: 'var(--card-shadow)',
             }}>
-              {t('dashboard.accountSettings')}
-            </h1>
+              <div style={{
+                position: 'relative',
+                display: 'inline-block',
+              }}>
+                <Avatar
+                  src={user.avatar}
+                  name={user.fullName}
+                  size={88}
+                  style={{
+                    border: '3px solid var(--blue)',
+                    boxShadow: '0 4px 16px rgba(107,107,240,0.2)',
+                  }}
+                />
+              </div>
+              <h2 style={{
+                fontSize: '1.4rem',
+                fontWeight: 700,
+                color: 'var(--black)',
+                margin: '1rem 0 0.2rem',
+                fontFamily: "'Cormorant Garamond', serif",
+              }}>
+                {user.fullName}
+              </h2>
+              <p style={{ color: 'var(--muted)', fontSize: '0.85rem', margin: 0 }}>
+                {user.email}
+              </p>
+              <div style={{
+                marginTop: '1rem',
+                display: 'flex',
+                gap: '0.5rem',
+                justifyContent: 'center',
+              }}>
+                <Link href="/dashboard/profile" style={{
+                  padding: '0.4rem 1rem',
+                  borderRadius: '8px',
+                  fontSize: '0.78rem',
+                  fontWeight: 600,
+                  background: 'var(--blue)',
+                  color: '#fff',
+                  textDecoration: 'none',
+                  transition: 'opacity 0.2s, transform 0.15s',
+                }}
+                  onMouseEnter={e => { e.currentTarget.style.opacity = '0.85'; e.currentTarget.style.transform = 'scale(1.02)' }}
+                  onMouseLeave={e => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.transform = 'scale(1)' }}
+                >
+                  {t('dashboard.editProfile')}
+                </Link>
+                <Link href="/dashboard/password" style={{
+                  padding: '0.4rem 1rem',
+                  borderRadius: '8px',
+                  fontSize: '0.78rem',
+                  fontWeight: 600,
+                  background: 'var(--input-bg)',
+                  color: 'var(--black)',
+                  textDecoration: 'none',
+                  border: '1px solid var(--border)',
+                  transition: 'background-color 0.2s, transform 0.15s',
+                }}
+                  onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'var(--border)'; e.currentTarget.style.transform = 'scale(1.02)' }}
+                  onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'var(--input-bg)'; e.currentTarget.style.transform = 'scale(1)' }}
+                >
+                  {t('dashboard.changePassword')}
+                </Link>
+              </div>
+            </div>
 
-            <div className="form-card" style={{ width: '100%', maxWidth: '420px' }}>
+            {/* Preferences Card */}
+            <div style={{
+              width: '100%',
+              background: 'var(--card-bg)',
+              borderRadius: '20px',
+              border: '1px solid var(--border)',
+              padding: '1.25rem 1.5rem',
+              marginBottom: '1rem',
+              boxShadow: 'var(--card-shadow)',
+            }}>
+              <p style={{
+                fontSize: '0.7rem',
+                fontWeight: 700,
+                letterSpacing: '0.12em',
+                textTransform: 'uppercase',
+                color: 'var(--muted)',
+                marginBottom: '0.75rem',
+              }}>
+                Preferences
+              </p>
+
               {/* Theme Toggle */}
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                paddingBottom: '1rem',
-                marginBottom: '1rem',
-                borderBottom: '1px solid var(--border)',
+                padding: '0.65rem 0',
+                borderBottom: '1px solid var(--border-light)',
               }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--muted)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--muted)', flexShrink: 0 }}>
                     <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
                   </svg>
                   <span style={{ fontSize: '0.9rem', fontWeight: 500, color: 'var(--black)' }}>{t('dashboard.theme')}</span>
@@ -880,12 +958,10 @@ export default function DashboardPage() {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                paddingBottom: '1.25rem',
-                marginBottom: '1.25rem',
-                borderBottom: '1px solid var(--border)',
+                padding: '0.65rem 0',
               }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--muted)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--muted)', flexShrink: 0 }}>
                     <circle cx="12" cy="12" r="10"/>
                     <line x1="2" y1="12" x2="22" y2="12"/>
                     <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
@@ -897,14 +973,15 @@ export default function DashboardPage() {
                   onChange={(e) => setLanguage(e.target.value as any)}
                   style={{
                     fontSize: '0.85rem',
-                    padding: '0.35rem 0.6rem',
-                    borderRadius: '6px',
+                    padding: '0.35rem 0.75rem',
+                    borderRadius: '8px',
                     border: '1px solid var(--border)',
                     background: 'var(--input-bg)',
                     color: 'var(--black)',
                     cursor: 'pointer',
                     fontFamily: 'inherit',
                     outline: 'none',
+                    transition: 'border-color 0.15s',
                   }}
                 >
                   {LANGUAGES.map((l) => (
@@ -914,261 +991,155 @@ export default function DashboardPage() {
                   ))}
                 </select>
               </div>
+            </div>
 
-              {/* Profile Avatar & Info */}
-              <div style={{ textAlign: 'center' }}>
-                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
-                  {user.avatar ? (
-                    <img
-                      src={user.avatar}
-                      alt="Avatar"
-                      style={{
-                        width: '80px',
-                        height: '80px',
-                        borderRadius: '50%',
-                        objectFit: 'cover',
-                        border: '2px solid var(--border)',
-                      }}
-                    />
-                  ) : (
-                    <div
-                      style={{
-                        width: '80px',
-                        height: '80px',
-                        borderRadius: '50%',
-                        backgroundColor: 'var(--input-bg)',
-                        color: 'var(--black)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: '1.5rem',
-                        fontWeight: '600',
-                        border: '2px solid var(--border)',
-                      }}
-                    >
-                      {initials}
-                    </div>
-                  )}
-                </div>
+            {/* Menu Card */}
+            <div style={{
+              width: '100%',
+              background: 'var(--card-bg)',
+              borderRadius: '20px',
+              border: '1px solid var(--border)',
+              padding: '0.75rem 0.5rem',
+              marginBottom: '1rem',
+              boxShadow: 'var(--card-shadow)',
+            }}>
+              <p style={{
+                fontSize: '0.7rem',
+                fontWeight: 700,
+                letterSpacing: '0.12em',
+                textTransform: 'uppercase',
+                color: 'var(--muted)',
+                padding: '0 0.75rem',
+                marginBottom: '0.25rem',
+              }}>
+                {t('dashboard.access')}
+              </p>
 
-                <div className="form-title" style={{ marginBottom: '0.25rem', fontSize: '1.4rem' }}>{user.fullName}</div>
-                <p style={{ color: 'var(--muted)', fontSize: '0.85rem', marginBottom: '1.5rem' }}>
-                  {user.email}
-                </p>
-              </div>
-
-              {/* Settings Sections */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                <div style={{
-                  fontSize: '0.7rem',
-                  fontWeight: 700,
-                  letterSpacing: '0.12em',
-                  textTransform: 'uppercase',
-                  color: 'var(--muted)',
-                  marginBottom: '0.25rem',
-                }}>
-                  {t('dashboard.account')}
-                </div>
-
-                <Link href="/dashboard/profile"
+              {user.role === 'admin' && (
+                <Link href="/admin"
+                  className="settings-link"
                   style={{
                     display: 'flex',
                     alignItems: 'center',
                     gap: '0.75rem',
-                    padding: '0.75rem 1rem',
-                    borderRadius: '10px',
-                    backgroundColor: 'var(--input-bg)',
-                    color: 'var(--black)',
+                    padding: '0.7rem 0.75rem',
+                    borderRadius: '12px',
+                    color: 'var(--blue)',
                     textDecoration: 'none',
                     fontSize: '0.9rem',
                     fontWeight: 500,
-                    transition: 'background-color 0.15s',
+                    transition: 'all 0.15s ease',
                   }}
-                  onMouseEnter={e => e.currentTarget.style.backgroundColor = 'var(--border)'}
-                  onMouseLeave={e => e.currentTarget.style.backgroundColor = 'var(--input-bg)'}
-                >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, color: 'var(--muted)' }}>
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                    <circle cx="12" cy="7" r="4"/>
-                  </svg>
-                  <span style={{ flex: 1 }}>{t('dashboard.editProfile')}</span>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--muted)' }}>
-                    <polyline points="9 18 15 12 9 6"/>
-                  </svg>
-                </Link>
-
-                <Link href="/dashboard/password"
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.75rem',
-                    padding: '0.75rem 1rem',
-                    borderRadius: '10px',
-                    backgroundColor: 'var(--input-bg)',
-                    color: 'var(--black)',
-                    textDecoration: 'none',
-                    fontSize: '0.9rem',
-                    fontWeight: 500,
-                    transition: 'background-color 0.15s',
-                  }}
-                  onMouseEnter={e => e.currentTarget.style.backgroundColor = 'var(--border)'}
-                  onMouseLeave={e => e.currentTarget.style.backgroundColor = 'var(--input-bg)'}
-                >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, color: 'var(--muted)' }}>
-                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-                    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-                  </svg>
-                  <span style={{ flex: 1 }}>{t('dashboard.changePassword')}</span>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--muted)' }}>
-                    <polyline points="9 18 15 12 9 6"/>
-                  </svg>
-                </Link>
-
-                <div style={{
-                  fontSize: '0.7rem',
-                  fontWeight: 700,
-                  letterSpacing: '0.12em',
-                  textTransform: 'uppercase',
-                  color: 'var(--muted)',
-                  marginTop: '0.75rem',
-                  marginBottom: '0.25rem',
-                }}>
-                  {t('dashboard.access')}
-                </div>
-
-                {user.role === 'admin' && (
-                  <Link href="/admin"
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.75rem',
-                      padding: '0.75rem 1rem',
-                      borderRadius: '10px',
-                      backgroundColor: 'var(--input-bg)',
-                      color: 'var(--blue)',
-                      textDecoration: 'none',
-                      fontSize: '0.9rem',
-                      fontWeight: 500,
-                      transition: 'background-color 0.15s',
-                    }}
-                    onMouseEnter={e => e.currentTarget.style.backgroundColor = 'var(--border)'}
-                    onMouseLeave={e => e.currentTarget.style.backgroundColor = 'var(--input-bg)'}
-                  >
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, color: 'var(--muted)' }}>
-                      <rect x="3" y="3" width="7" height="7"/>
-                      <rect x="14" y="3" width="7" height="7"/>
-                      <rect x="14" y="14" width="7" height="7"/>
-                      <rect x="3" y="14" width="7" height="7"/>
-                    </svg>
-                    <span style={{ flex: 1 }}>{t('dashboard.adminPanel')}</span>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--muted)' }}>
-                      <polyline points="9 18 15 12 9 6"/>
-                    </svg>
-                  </Link>
-                )}
-
-                <div style={{
-                  fontSize: '0.7rem',
-                  fontWeight: 700,
-                  letterSpacing: '0.12em',
-                  textTransform: 'uppercase',
-                  color: 'var(--muted)',
-                  marginTop: '0.75rem',
-                  marginBottom: '0.25rem',
-                }}>
-                  Support
-                </div>
-
-                <Link href="/help"
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.75rem',
-                    padding: '0.75rem 1rem',
-                    borderRadius: '10px',
-                    backgroundColor: 'var(--input-bg)',
-                    color: 'var(--black)',
-                    textDecoration: 'none',
-                    fontSize: '0.9rem',
-                    fontWeight: 500,
-                    transition: 'background-color 0.15s',
-                  }}
-                  onMouseEnter={e => e.currentTarget.style.backgroundColor = 'var(--border)'}
-                  onMouseLeave={e => e.currentTarget.style.backgroundColor = 'var(--input-bg)'}
-                >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, color: 'var(--muted)' }}>
-                    <circle cx="12" cy="12" r="10"/>
-                    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
-                    <line x1="12" y1="17" x2="12.01" y2="17"/>
-                  </svg>
-                  <span style={{ flex: 1 }}>{t('dashboard.helpCenter')}</span>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--muted)' }}>
-                    <polyline points="9 18 15 12 9 6"/>
-                  </svg>
-                </Link>
-
-                <Link href="/privacy"
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.75rem',
-                    padding: '0.75rem 1rem',
-                    borderRadius: '10px',
-                    backgroundColor: 'var(--input-bg)',
-                    color: 'var(--black)',
-                    textDecoration: 'none',
-                    fontSize: '0.9rem',
-                    fontWeight: 500,
-                    transition: 'background-color 0.15s',
-                    marginBottom: '0.75rem',
-                  }}
-                  onMouseEnter={e => e.currentTarget.style.backgroundColor = 'var(--border)'}
-                  onMouseLeave={e => e.currentTarget.style.backgroundColor = 'var(--input-bg)'}
-                >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, color: 'var(--muted)' }}>
-                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                    <line x1="3" y1="9" x2="21" y2="9"/>
-                    <line x1="9" y1="21" x2="9" y2="9"/>
-                  </svg>
-                  <span style={{ flex: 1 }}>{t('dashboard.privacyPolicy')}</span>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--muted)' }}>
-                    <polyline points="9 18 15 12 9 6"/>
-                  </svg>
-                </Link>
-
-                <button
-                  onClick={handleLogout}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.75rem',
-                    padding: '0.75rem 1rem',
-                    borderRadius: '10px',
-                    backgroundColor: 'transparent',
-                    color: 'var(--error)',
-                    textDecoration: 'none',
-                    fontSize: '0.9rem',
-                    fontWeight: 500,
-                    border: '1px solid var(--border)',
-                    cursor: 'pointer',
-                    fontFamily: 'inherit',
-                    transition: 'background-color 0.15s',
-                  }}
-                  onMouseEnter={e => e.currentTarget.style.backgroundColor = 'var(--input-bg)'}
-                  onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
                 >
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
-                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-                    <polyline points="16 17 21 12 16 7"/>
-                    <line x1="21" y1="12" x2="9" y2="12"/>
+                    <rect x="3" y="3" width="7" height="7"/>
+                    <rect x="14" y="3" width="7" height="7"/>
+                    <rect x="14" y="14" width="7" height="7"/>
+                    <rect x="3" y="14" width="7" height="7"/>
                   </svg>
-                  <span style={{ flex: 1 }}>{t('dashboard.logOut')}</span>
-                </button>
-              </div>
+                  <span style={{ flex: 1 }}>{t('dashboard.adminPanel')}</span>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--muted)' }}>
+                    <polyline points="9 18 15 12 9 6"/>
+                  </svg>
+                </Link>
+              )}
+
+              <Link href="/help"
+                className="settings-link"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.75rem',
+                  padding: '0.7rem 0.75rem',
+                  borderRadius: '12px',
+                  color: 'var(--black)',
+                  textDecoration: 'none',
+                  fontSize: '0.9rem',
+                  fontWeight: 500,
+                  transition: 'all 0.15s ease',
+                }}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, color: 'var(--muted)' }}>
+                  <circle cx="12" cy="12" r="10"/>
+                  <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                  <line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
+                <span style={{ flex: 1 }}>{t('dashboard.helpCenter')}</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--muted)' }}>
+                  <polyline points="9 18 15 12 9 6"/>
+                </svg>
+              </Link>
+
+              <Link href="/privacy"
+                className="settings-link"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.75rem',
+                  padding: '0.7rem 0.75rem',
+                  borderRadius: '12px',
+                  color: 'var(--black)',
+                  textDecoration: 'none',
+                  fontSize: '0.9rem',
+                  fontWeight: 500,
+                  transition: 'all 0.15s ease',
+                }}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, color: 'var(--muted)' }}>
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                  <line x1="3" y1="9" x2="21" y2="9"/>
+                  <line x1="9" y1="21" x2="9" y2="9"/>
+                </svg>
+                <span style={{ flex: 1 }}>{t('dashboard.privacyPolicy')}</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--muted)' }}>
+                  <polyline points="9 18 15 12 9 6"/>
+                </svg>
+              </Link>
             </div>
+
+            {/* Logout */}
+            <button
+              onClick={handleLogout}
+              className="settings-link"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.75rem',
+                padding: '0.85rem 1rem',
+                borderRadius: '14px',
+                color: 'var(--error)',
+                background: 'var(--card-bg)',
+                textDecoration: 'none',
+                fontSize: '0.9rem',
+                fontWeight: 500,
+                border: '1px solid var(--border)',
+                cursor: 'pointer',
+                fontFamily: 'inherit',
+                width: '100%',
+                transition: 'all 0.15s ease',
+                boxShadow: 'var(--card-shadow)',
+              }}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                <polyline points="16 17 21 12 16 7"/>
+                <line x1="21" y1="12" x2="9" y2="12"/>
+              </svg>
+              <span style={{ flex: 1 }}>{t('dashboard.logOut')}</span>
+            </button>
           </div>
         )}
       </main>
+
+      <style>{`
+        .settings-link:hover {
+          background-color: var(--input-bg) !important;
+          transform: translateX(4px);
+        }
+        .settings-link:active {
+          transform: translateX(2px) scale(0.99);
+        }
+      `}</style>
 
       {/* ── CART DRAWER ── */}
       {cartOpen && (
