@@ -41,4 +41,7 @@ export const ENDPOINTS = {
     verify: '/payments/verify',
     callback: '/payments/khalti/callback',
   },
+  chat: {
+    send: '/chat',
+  },
 }

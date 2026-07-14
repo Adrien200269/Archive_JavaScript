@@ -18,6 +18,8 @@ interface Order {
   items: OrderItem[]
   totalPrice: number
   status: 'Pending' | 'Shipped' | 'Delivered' | 'Cancelled'
+  paymentMethod: 'cod' | 'khalti'
+  paymentStatus: 'pending' | 'paid' | 'failed'
   createdAt: string
   phone?: string
   location?: string
@@ -42,6 +44,18 @@ const STATUS_BG: Record<string, string> = {
   Shipped: '#eaeafe',
   Delivered: '#e8f8f0',
   Cancelled: '#f2f2f2',
+}
+
+const PAYMENT_STATUS_COLORS: Record<string, string> = {
+  paid: '#27ae60',
+  pending: '#f39c12',
+  failed: '#e74c3c',
+}
+
+const PAYMENT_STATUS_BG: Record<string, string> = {
+  paid: '#e8f8f0',
+  pending: '#fef9e7',
+  failed: '#fdedec',
 }
 
 export default function AdminOrdersPage() {
@@ -124,6 +138,7 @@ export default function AdminOrdersPage() {
                   <th>{t('dashboard.deliveryDetails')}</th>
                   <th>{t('admin.items')}</th>
                   <th>{t('admin.total')}</th>
+                  <th>{t('admin.payment')}</th>
                   <th>{t('admin.date')}</th>
                   <th>{t('admin.status')}</th>
                   <th>{t('admin.actions')}</th>
@@ -155,6 +170,34 @@ export default function AdminOrdersPage() {
                       ))}
                     </td>
                     <td style={{ fontWeight: 700 }}>₹{(order.totalPrice ?? 0).toLocaleString()}</td>
+                    <td>
+                      <div style={{ marginBottom: '0.3rem' }}>
+                        <span style={{
+                          fontSize: '0.72rem',
+                          fontWeight: 600,
+                          textTransform: 'uppercase',
+                          color: order.paymentMethod === 'khalti' ? '#2b2be0' : '#888',
+                          backgroundColor: order.paymentMethod === 'khalti' ? '#eaeafe' : '#f2f2f2',
+                          padding: '0.2rem 0.5rem',
+                          borderRadius: '4px',
+                        }}>
+                          {order.paymentMethod === 'khalti' ? t('admin.khalti') : t('admin.cod')}
+                        </span>
+                      </div>
+                      <span style={{
+                        fontSize: '0.72rem',
+                        fontWeight: 600,
+                        textTransform: 'uppercase',
+                        color: PAYMENT_STATUS_COLORS[order.paymentStatus] ?? '#888',
+                        backgroundColor: PAYMENT_STATUS_BG[order.paymentStatus] ?? '#f2f2f2',
+                        padding: '0.2rem 0.5rem',
+                        borderRadius: '4px',
+                      }}>
+                        {order.paymentStatus === 'paid' ? t('admin.paymentPaid') :
+                         order.paymentStatus === 'failed' ? t('admin.paymentFailed') :
+                         t('admin.paymentPending')}
+                      </span>
+                    </td>
                     <td style={{ color: '#888', fontSize: '0.82rem', whiteSpace: 'nowrap' }}>
                       {order.createdAt ? formatDate(order.createdAt) : '-'}
                     </td>

@@ -3,6 +3,7 @@ import { Metadata } from 'next'
 import { AuthProvider } from './context/AuthContext'
 import { ThemeProvider } from './context/ThemeContext'
 import { LanguageProvider } from '../lib/i18n/context'
+import ChatBot from './components/ChatBot'
 
 export const metadata: Metadata = {
   title: 'Archive Outfitters',
@@ -24,6 +25,7 @@ export default function RootLayout({
           <LanguageProvider>
             <AuthProvider>
               {children}
+              <ChatBot />
             </AuthProvider>
           </LanguageProvider>
         </ThemeProvider>
