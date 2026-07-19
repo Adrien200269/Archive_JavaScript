@@ -259,16 +259,9 @@ export default function DashboardPage() {
         {/* Left Heart Icon (Wishlist Filter Toggle) */}
         <button
           onClick={() => setFavoritesOnly(!favoritesOnly)}
+          className="header-btn"
           style={{
-            background: 'none',
-            border: 'none',
-            cursor: 'pointer',
-            padding: '0.5rem',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
             color: favoritesOnly ? '#e74c3c' : 'var(--black)',
-            transition: 'color 0.2s ease, transform 0.2s ease',
             transform: favoritesOnly ? 'scale(1.1)' : 'scale(1)'
           }}
           title={favoritesOnly ? t('dashboard.showAll') : t('dashboard.showFavOnly')}
@@ -295,13 +288,16 @@ export default function DashboardPage() {
               height: '38px',
               padding: '0 1rem 0 2.5rem',
               borderRadius: '20px',
-              border: '1px solid var(--border)',
+              border: '2px solid var(--border)',
               fontSize: '0.9rem',
               outline: 'none',
               fontFamily: 'inherit',
-              transition: 'border-color 0.2s ease',
-              backgroundColor: 'var(--input-bg)'
+              transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
+              backgroundColor: 'var(--card-bg)',
+              boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
             }}
+            onFocus={e => { e.currentTarget.style.borderColor = 'var(--blue)'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(107,107,240,0.15)' }}
+            onBlur={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.boxShadow = '0 1px 4px rgba(0,0,0,0.04)' }}
           />
           <span style={{
             position: 'absolute',
@@ -321,18 +317,10 @@ export default function DashboardPage() {
         </div>
 
         {/* Right Cart Icon */}
-        <button style={{
-          background: 'none',
-          border: 'none',
-          cursor: 'pointer',
-          padding: '0.5rem',
-          position: 'relative',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          color: 'var(--black)'
-        }}
-        onClick={() => setCartOpen(true)}
+        <button
+          className="header-btn"
+          style={{ position: 'relative', color: 'var(--black)' }}
+          onClick={() => setCartOpen(true)}
         >
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <circle cx="9" cy="21" r="1"/>
@@ -412,7 +400,7 @@ export default function DashboardPage() {
                   gap: '1rem',
                 }}>
                   {recommendations.map((product) => (
-                    <div key={product._id} style={{
+                    <div key={product._id} className="card-hover" style={{
                       backgroundColor: 'var(--card-bg)',
                       border: '1px solid var(--border-light)',
                       borderRadius: '12px',
@@ -420,7 +408,6 @@ export default function DashboardPage() {
                       display: 'flex',
                       flexDirection: 'column',
                       boxShadow: '0 4px 12px rgba(0,0,0,0.03)',
-                      transition: 'transform 0.2s ease, box-shadow 0.2s ease',
                     }}>
                       <div style={{
                         position: 'relative',
@@ -459,6 +446,7 @@ export default function DashboardPage() {
                         </p>
                         <button
                           onClick={() => addToCart(product)}
+                          className="btn-scale"
                           style={{
                             marginTop: '0.6rem',
                             width: '100%',
@@ -515,7 +503,7 @@ export default function DashboardPage() {
                 gap: '1.5rem'
               }}>
                 {filteredProducts.map((product) => (
-                  <div key={product._id} className="fade-up" style={{
+                  <div key={product._id} className="fade-up card-hover" style={{
                     backgroundColor: 'var(--card-bg)',
                     border: '1px solid var(--border-light)',
                     borderRadius: '16px',
@@ -523,19 +511,19 @@ export default function DashboardPage() {
                     display: 'flex',
                     flexDirection: 'column',
                     boxShadow: '0 4px 12px rgba(0,0,0,0.03)',
-                    transition: 'transform 0.2s ease, box-shadow 0.2s ease',
                     position: 'relative'
                   }}>
                     {/* Image Container */}
-                    <div style={{
+                    <div className="product-img-wrap" style={{
                       position: 'relative',
                       backgroundColor: 'var(--input-bg)',
-                      paddingTop: '100%', // Square image container
+                      paddingTop: '100%',
                       overflow: 'hidden'
                     }}>
                       <img
                         src={product.imageUrl}
                         alt={product.name}
+                        className="product-img"
                         style={{
                           position: 'absolute',
                           top: 0,
@@ -543,7 +531,7 @@ export default function DashboardPage() {
                           width: '100%',
                           height: '100%',
                           objectFit: 'cover',
-                          transition: 'transform 0.3s ease'
+                          transition: 'transform 0.4s ease'
                         }}
                       />
                       
@@ -605,6 +593,7 @@ export default function DashboardPage() {
                       {/* Add to Cart button */}
                       <button
                         onClick={() => addToCart(product)}
+                        className="btn-scale"
                         style={{
                           marginTop: '0.8rem',
                           width: '100%',
@@ -620,7 +609,6 @@ export default function DashboardPage() {
                           alignItems: 'center',
                           justifyContent: 'center',
                           gap: '0.4rem',
-                          transition: 'background-color 0.2s'
                         }}
                       >
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -1139,6 +1127,46 @@ export default function DashboardPage() {
         .settings-link:active {
           transform: translateX(2px) scale(0.99);
         }
+        .card-hover:hover .product-img {
+          transform: scale(1.08);
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        .tab-btn {
+          background: none;
+          border: none;
+          cursor: pointer;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          padding: 0.4rem;
+          transition: color 0.2s ease, transform 0.15s ease;
+        }
+        .tab-btn:hover {
+          transform: translateY(-2px);
+        }
+        .tab-btn:active {
+          transform: scale(0.93);
+        }
+        .header-btn {
+          background: none;
+          border: none;
+          cursor: pointer;
+          padding: 0.5rem;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: color 0.2s ease, transform 0.2s ease;
+        }
+        .header-btn:hover {
+          transform: scale(1.1);
+        }
+        .header-btn:active {
+          transform: scale(0.92);
+        }
       `}</style>
 
       {/* ── CART DRAWER ── */}
@@ -1154,6 +1182,7 @@ export default function DashboardPage() {
             position: 'absolute',
             inset: 0,
             backgroundColor: 'rgba(0,0,0,0.3)',
+            animation: 'fadeIn 0.2s ease',
           }} onClick={() => setCartOpen(false)} />
           <div style={{
             position: 'relative',
@@ -1445,17 +1474,9 @@ export default function DashboardPage() {
         {/* Tab 1: Orders (Clipboard icon) */}
         <button
           onClick={() => setActiveTab('orders')}
+          className="tab-btn"
           style={{
-            background: 'none',
-            border: 'none',
-            cursor: 'pointer',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
             color: activeTab === 'orders' ? 'var(--blue)' : 'var(--muted)',
-            transition: 'color 0.2s ease',
-            padding: '0.4rem'
           }}
         >
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -1470,17 +1491,9 @@ export default function DashboardPage() {
         {/* Tab 2: Home (House icon) */}
         <button
           onClick={() => setActiveTab('home')}
+          className="tab-btn"
           style={{
-            background: 'none',
-            border: 'none',
-            cursor: 'pointer',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
             color: activeTab === 'home' ? 'var(--blue)' : 'var(--muted)',
-            transition: 'color 0.2s ease',
-            padding: '0.4rem'
           }}
         >
           <svg width="24" height="24" viewBox="0 0 24 24" fill={activeTab === 'home' ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -1492,17 +1505,9 @@ export default function DashboardPage() {
         {/* Tab 3: Profile (User icon) */}
         <button
           onClick={() => setActiveTab('profile')}
+          className="tab-btn"
           style={{
-            background: 'none',
-            border: 'none',
-            cursor: 'pointer',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
             color: activeTab === 'profile' ? 'var(--blue)' : 'var(--muted)',
-            transition: 'color 0.2s ease',
-            padding: '0.4rem'
           }}
         >
           <svg width="24" height="24" viewBox="0 0 24 24" fill={activeTab === 'profile' ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
