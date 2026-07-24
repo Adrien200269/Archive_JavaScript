@@ -9,5 +9,6 @@ router.use(authenticate);
 
 router.post("/", asyncHandler(orderController.createOrder));
 router.get("/my", asyncHandler(orderController.getMyOrders));
+router.delete("/:id", asyncHandler(orderController.deleteOrder));
 
 export default router;

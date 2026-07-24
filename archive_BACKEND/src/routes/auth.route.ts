@@ -18,5 +18,6 @@ router.put("/update", authenticate, upload.single("avatar"), asyncHandler(authCo
 // OAuth routes
 router.get("/google", oauthController.googleAuth);
 router.get("/google/callback", oauthController.googleCallback);
+router.post("/google/mobile", asyncHandler(oauthController.googleMobile));
 
 export default router;

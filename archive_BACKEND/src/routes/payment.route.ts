@@ -8,5 +8,6 @@ const router = Router();
 router.post("/create", authenticate, asyncHandler(paymentController.createOrderWithPayment));
 router.get("/khalti/callback", asyncHandler(paymentController.khaltiCallback));
 router.post("/verify", authenticate, asyncHandler(paymentController.verifyPayment));
+router.get("/order/:orderId/status", authenticate, asyncHandler(paymentController.orderPaymentStatus));
 
 export default router;

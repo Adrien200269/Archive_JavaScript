@@ -50,7 +50,7 @@ export async function initiatePayment(
     throw new Error(`Khalti initiate failed: ${err}`);
   }
 
-  return res.json();
+  return res.json() as Promise<KhaltiInitiateResponse>;
 }
 
 export interface KhaltiLookupResponse {
@@ -72,5 +72,5 @@ export async function lookupPayment(pidx: string): Promise<KhaltiLookupResponse>
     throw new Error(`Khalti lookup failed: ${err}`);
   }
 
-  return res.json();
+  return res.json() as Promise<KhaltiLookupResponse>;
 }

@@ -71,4 +71,18 @@ export const orderController = {
 
     return res.status(200).json({ success: true, data: orders });
   },
+
+  async deleteOrder(req: Request, res: Response) {
+    const { id } = req.params;
+    const userId = (req as any).userId;
+
+    const order = await Order.findOne({ _id: id, user: userId });
+    if (!order) {
+      return res.status(404).json({ success: false, message: "Order not found" });
+    }
+
+    await Order.deleteOne({ _id: id });
+
+    return res.status(200).json({ success: true, message: "Order removed from history" });
+  },
 };
