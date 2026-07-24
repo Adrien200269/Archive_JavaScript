@@ -103,12 +103,12 @@ export const paymentController = {
     const { pidx, status } = req.query as { pidx?: string; status?: string };
 
     if (!pidx) {
-      return res.send(paymentResultPage("error", "Missing payment ID"));
+      return res.redirect(`${CLIENT_URL}/dashboard?payment=failed`);
     }
 
     const order = await Order.findOne({ stripePaymentIntentId: pidx });
     if (!order) {
-      return res.send(paymentResultPage("error", "Order not found"));
+      return res.redirect(`${CLIENT_URL}/dashboard?payment=failed`);
     }
 
     if (status === "Completed") {
@@ -116,13 +116,13 @@ export const paymentController = {
       if (lookup.status === "Completed") {
         order.paymentStatus = "paid";
         await order.save();
-        return res.send(paymentResultPage("success", "Payment successful! You can now close this tab and return to the app."));
+        return res.redirect(`${CLIENT_URL}/dashboard?payment=success`);
       }
     }
 
     order.paymentStatus = "failed";
     await order.save();
-    return res.send(paymentResultPage("failed", "Payment failed. Please try again in the app."));
+    return res.redirect(`${CLIENT_URL}/dashboard?payment=failed`);
   },
 
   async verifyPayment(req: Request, res: Response) {
@@ -153,20 +153,3 @@ export const paymentController = {
   },
 };
 
-function paymentResultPage(status: string, message: string): string {
-  const color = status === "success" ? "#2E7D32" : status === "failed" ? "#E53935" : "#F57C00";
-  const icon = status === "success" ? "✓" : "✗";
-  return `<!DOCTYPE html>
-<html lang="en">
-<head><meta name="viewport" content="width=device-width,initial-scale=1"><title>Payment Status</title>
-<style>
-  body{font-family:-apple-system,sans-serif;display:flex;justify-content:center;align-items:center;min-height:100vh;margin:0;background:#f0f0f3;color:#111}
-  .card{background:#fff;border-radius:16px;padding:40px;text-align:center;box-shadow:0 4px 16px rgba(0,0,0,0.07);max-width:360px;margin:20px}
-  .icon{font-size:48px;width:64px;height:64px;border-radius:32px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;color:#fff;background:${color}}
-  h2{margin:0 0 8px;font-size:20px}
-  p{margin:0 0 24px;color:#666;font-size:14px;line-height:1.5}
-  .btn{display:inline-block;padding:12px 24px;border-radius:12px;background:#111;color:#fff;text-decoration:none;font-size:14px;font-weight:600}
-</style></head>
-<body><div class="card"><div class="icon">${icon}</div><h2>Payment ${status}</h2><p>${message}</p><a class="btn" href="javascript:window.close()">Close</a></div></body>
-</html>`;
-}
