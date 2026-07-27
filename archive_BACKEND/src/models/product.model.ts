@@ -1,5 +1,9 @@
 import mongoose, { Document, Schema } from "mongoose";
 
+/**
+ * Mongoose document interface for a Product.
+ * Extends Document to include Mongoose's built-in fields (_id, __v, etc.).
+ */
 export interface IProduct extends Document {
   name: string;
   price: number;
@@ -9,6 +13,10 @@ export interface IProduct extends Document {
   updatedAt: Date;
 }
 
+/**
+ * Mongoose schema definition for a Product document.
+ * Automatically adds `createdAt` and `updatedAt` timestamp fields.
+ */
 const productSchema = new Schema<IProduct>(
   {
     name: {
