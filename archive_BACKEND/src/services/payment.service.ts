@@ -29,6 +29,14 @@ export interface KhaltiInitiateResponse {
   total_amount: number;
 }
 
+/**
+ * Initiates a new Khalti ePay payment session.
+ * Converts the amount from NPR to paisa (×100) before sending.
+ *
+ * @param params - Payment initiation parameters including amount, order info, and customer details.
+ * @returns A promise resolving to the Khalti payment URL and transaction PIDX.
+ * @throws Error if the Khalti API returns a non-OK response.
+ */
 export async function initiatePayment(
   params: KhaltiInitiateParams
 ): Promise<KhaltiInitiateResponse> {
@@ -60,6 +68,13 @@ export interface KhaltiLookupResponse {
   transaction_id: string | null;
 }
 
+/**
+ * Looks up the status of an existing Khalti payment by PIDX.
+ *
+ * @param pidx - The payment identifier returned by `initiatePayment`.
+ * @returns A promise resolving to the payment status and transaction details.
+ * @throws Error if the Khalti API returns a non-OK response.
+ */
 export async function lookupPayment(pidx: string): Promise<KhaltiLookupResponse> {
   const res = await fetch(`${KHALTI_API}/epayment/lookup/`, {
     method: "POST",
