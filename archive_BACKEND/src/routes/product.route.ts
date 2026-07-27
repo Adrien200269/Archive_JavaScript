@@ -1,3 +1,13 @@
+/**
+ * Product Routes
+ * Base path: /api/v1/products
+ *
+ * POST   /         — Add a new product (admin only, supports image upload).
+ * GET    /         — Retrieve all products (public).
+ * PUT    /:id      — Update a product by ID (admin only, supports image upload).
+ * DELETE /:id      — Delete a product by ID (admin only).
+ * PATCH  /:id/favorite — Toggle the favourite status of a product.
+ */
 import { Router } from "express";
 import { productController } from "../controllers/product.controller";
 import { authenticate } from "../middleware/auth.middleware";
