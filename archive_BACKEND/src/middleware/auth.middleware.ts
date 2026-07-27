@@ -2,8 +2,14 @@ import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import { JwtPayload } from "../types/user.type";
 
-// Reads the JWT from the httpOnly cookie OR the Authorization header,
-// verifies it, and attaches the user id to the request.
+/**
+ * Authentication middleware.
+ * Reads the JWT from the httpOnly cookie OR the Authorization Bearer header,
+ * verifies its signature and expiry, then attaches userId, userRole,
+ * and userEmail onto the request object for downstream handlers.
+ *
+ * @throws 401 if no token is present or the token is invalid/expired.
+ */
 export const authenticate = (
   req: Request,
   res: Response,
