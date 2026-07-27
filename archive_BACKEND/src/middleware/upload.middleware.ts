@@ -2,13 +2,20 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 
-// Ensure upload directory exists
+/**
+ * Ensures the local uploads directory exists on startup.
+ * Creates the directory recursively if it does not already exist.
+ */
 const uploadDir = path.join(process.cwd(), "uploads");
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
 
-// Storage configuration
+/**
+ * Multer disk storage configuration.
+ * Files are saved to the local `uploads/` directory with a unique
+ * timestamp-based filename that preserves the original extension.
+ */
 const storage = multer.diskStorage({
   destination: (_req, _file, cb) => {
     cb(null, uploadDir);
