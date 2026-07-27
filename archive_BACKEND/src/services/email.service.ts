@@ -1,5 +1,10 @@
 import nodemailer from "nodemailer";
 
+/**
+ * Nodemailer SMTP transporter.
+ * Uses environment variables for host, port, and credentials.
+ * Defaults to Gmail on port 587 (STARTTLS).
+ */
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST || "smtp.gmail.com",
   port: parseInt(process.env.SMTP_PORT || "587"),
@@ -10,6 +15,12 @@ const transporter = nodemailer.createTransport({
   },
 });
 
+/**
+ * Sends a password-reset OTP email to the specified address.
+ *
+ * @param to   - The recipient's email address.
+ * @param code - The 6-digit OTP code to include in the email.
+ */
 export async function sendResetCodeEmail(to: string, code: string): Promise<void> {
   const from = process.env.EMAIL_FROM || "noreply@archiveoutfitters.com";
 
