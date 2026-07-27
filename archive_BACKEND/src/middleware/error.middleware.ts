@@ -1,14 +1,25 @@
 import { Request, Response, NextFunction } from "express";
 
-// Wraps async route handlers so thrown errors reach the error handler
-// without try/catch in every controller.
+/**
+ * Higher-order function that wraps an async route handler.
+ * Automatically forwards any thrown errors to Express's next(err),
+ * eliminating the need for try/catch in every controller.
+ *
+ * @param fn - The async route handler to wrap.
+ */
 export const asyncHandler =
   (fn: (req: Request, res: Response, next: NextFunction) => Promise<any>) =>
   (req: Request, res: Response, next: NextFunction) => {
     Promise.resolve(fn(req, res, next)).catch(next);
   };
 
-// Central error handler: turns thrown errors into clean JSON responses.
+/**
+ * Central Express error handler.
+ * Must be registered LAST in the middleware chain.
+ * Converts thrown errors into a consistent JSON error response.
+ *
+ * @param err  - The thrown error (may include a .status property).
+ */
 export const errorHandler = (
   err: any,
   _req: Request,
