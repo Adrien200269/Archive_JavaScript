@@ -3,6 +3,10 @@ import { User } from "../models/user.model";
 import { Order } from "../models/order.model";
 import { Product } from "../models/product.model";
 
+/**
+ * OpenAI-compatible client configured to use the OpenRouter proxy.
+ * Allows access to multiple LLM models (e.g. GPT-4o-mini) via a single API key.
+ */
 const openai = new OpenAI({
   baseURL: "https://openrouter.ai/api/v1",
   apiKey: process.env.OPENAI_API_KEY || "",
