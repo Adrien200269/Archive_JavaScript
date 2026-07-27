@@ -24,11 +24,10 @@ app.use(passport.initialize());
 app.use(
   cors({
     origin: process.env.CLIENT_URL || "http://localhost:3000",
-    credentials: true, // allow cookies to be sent cross-origin
+    credentials: true, 
   })
 );
 
-// Health check
 app.get("/", (_req, res) => res.json({ status: "Archive Outfitters API is running" }));
 
 // Routes
@@ -43,7 +42,6 @@ app.use("/api/v1/payments", paymentRoutes);
 app.use("/api/v1/chat", chatRoutes);
 
 
-// Error handler must be last
 app.use(errorHandler);
 
 export default app;
