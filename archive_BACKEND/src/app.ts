@@ -1,3 +1,14 @@
+/**
+ * Express Application
+ *
+ * Configures and assembles the Archive Outfitters API server:
+ * - Static file serving for uploaded images
+ * - JSON body parsing and cookie parsing
+ * - Passport.js initialisation for OAuth strategies
+ * - CORS configured for the frontend client URL
+ * - API route registration under /api/v1/*
+ * - Central error handler (must remain last middleware)
+ */
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
