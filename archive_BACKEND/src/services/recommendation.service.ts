@@ -2,6 +2,10 @@ import { Product } from "../models/product.model";
 import { Order } from "../models/order.model";
 import { User } from "../models/user.model";
 
+/**
+ * Keyword map used to match product names/descriptions to age groups.
+ * Each key is an age group label and the value is a list of relevant style terms.
+ */
 const ageKeywords: Record<string, string[]> = {
   teen: ["street", "casual", "hoodie", "sneaker", "graphic", "denim", "cap", "urban"],
   young: ["trendy", "party", "fashion", "blazer", "slim", "formal", "smart", "minimal"],
@@ -9,6 +13,12 @@ const ageKeywords: Record<string, string[]> = {
   senior: ["comfort", "classic", "cotton", "loose", "walking", "cardigan", "flat", "warm"],
 };
 
+/**
+ * Maps a numeric age to a broad demographic group string.
+ *
+ * @param age - The user's age in years.
+ * @returns One of 'teen', 'young', 'adult', 'senior', or 'popular' if age is undefined.
+ */
 function getAgeGroup(age?: number): string {
   if (!age) return "popular";
   if (age <= 19) return "teen";
