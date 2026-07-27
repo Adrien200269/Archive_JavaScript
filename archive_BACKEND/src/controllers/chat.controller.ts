@@ -4,6 +4,13 @@ import { chatService } from "../services/chat.service";
 import { JwtPayload } from "../types/user.type";
 
 export const chatController = {
+  /**
+   * Handles an incoming chat message from the client.
+   * Optionally identifies the user from their JWT cookie for personalised replies.
+   * Delegates to chatService for AI-powered response generation.
+   *
+   * @route POST /api/v1/chat
+   */
   async sendMessage(req: Request, res: Response) {
     const { message } = req.body;
 
